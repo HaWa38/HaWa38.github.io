@@ -22,13 +22,12 @@
         .preview-list { overflow-y: auto; flex-grow: 1; border: 1px solid #eee; border-radius: 8px; padding: 5px 15px; }
         .preview-item { font-size: 0.95rem; border-bottom: 1px solid #f0f0f0; padding: 8px 0; text-align: left; }
 
-        button { width: 100%; padding: 12px; border-radius: 12px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; }
+        button { width: 100%; padding: 12px; border-radius: 12px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
         .btn-primary { background: var(--primary); color: white; margin-top: 5px; }
         .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); margin-bottom: 5px; }
         .btn-secondary { background: white; border: 2px solid #dadce0; color: #3c4043; }
         .btn-danger { background: #fce8e6; color: #d93025; font-size: 0.85rem; margin-top: 10px; padding: 8px; }
 
-        /* 遊戲畫面樣式 */
         .chinese-hint { font-size: 1.8rem; font-weight: bold; margin: 10px 0; color: #202124; }
         .spell-display { font-size: 2.2rem; letter-spacing: 2px; color: var(--primary); border-bottom: 3px solid var(--primary); display: inline-block; min-width: 180px; min-height: 2.8rem; margin-bottom: 15px; font-weight: bold; white-space: pre; }
         
@@ -102,59 +101,43 @@
 <script>
     let wordData = {}, quizList = [], currentIdx = 0, currentInput = "";
     let attemptsLeft = 3, totalAttempts = 0, correctAnswers = 0, initialQuizCount = 0;
-    
-    // 語音與音效變數
     let synth = window.speechSynthesis, voices = [];
     let audioCtx; 
 
-    // 初始化語音引擎
     function initVoices() {
         voices = synth.getVoices().filter(v => v.lang.includes('en'));
         document.getElementById('voice-select').innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
     }
     if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = initVoices;
 
-    // Web Audio API 產生音效
     function playSound(type) {
         if (!audioCtx) return;
         if (audioCtx.state === 'suspended') audioCtx.resume();
-        
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
         const now = audioCtx.currentTime;
-        
         if (type === 'correct') {
-            oscillator.type = 'triangle';
-            oscillator.frequency.setValueAtTime(523.25, now);
-            oscillator.frequency.exponentialRampToValueAtTime(659.25, now + 0.1);
-            gainNode.gain.setValueAtTime(0, now);
-            gainNode.gain.linearRampToValueAtTime(0.3, now + 0.05);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-            oscillator.start(now);
-            oscillator.stop(now + 0.3);
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, now);
+            osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1);
+            gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.3, now + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+            osc.start(now); osc.stop(now + 0.3);
         } else if (type === 'incorrect') {
-            oscillator.type = 'sawtooth';
-            oscillator.frequency.setValueAtTime(150, now);
-            oscillator.frequency.linearRampToValueAtTime(100, now + 0.2);
-            gainNode.gain.setValueAtTime(0, now);
-            gainNode.gain.linearRampToValueAtTime(0.2, now + 0.05);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-            oscillator.start(now);
-            oscillator.stop(now + 0.2);
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now);
+            osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+            gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.2, now + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+            osc.start(now); osc.stop(now + 0.2);
         }
     }
 
-    // 朗讀單一字母
     function speakLetter(char) {
         synth.cancel(); 
-        const textToSpeak = (char === ' ') ? 'space' : char;
-        const utter = new SpeechSynthesisUtterance(textToSpeak);
+        const utter = new SpeechSynthesisUtterance(char === ' ' ? 'space' : char);
         const vIdx = document.getElementById('voice-select').value;
         if(voices[vIdx]) utter.voice = voices[vIdx];
-        utter.rate = 1.2; 
+        utter.rate = 1.3;
         synth.speak(utter);
     }
 
@@ -204,7 +187,6 @@
 
     function initGame() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
         const lvl = document.getElementById('level-select').value;
         const mode = document.getElementById('quiz-mode').value;
         let start = parseInt(document.getElementById('r-start').value) - 1;
@@ -213,9 +195,7 @@
 
         let baseList = wordData[lvl].slice(start, end).sort(() => Math.random() - 0.5);
         quizList = (mode === "random10") ? baseList.slice(0, 10) : baseList;
-        
-        initialQuizCount = quizList.length;
-        currentIdx = 0; totalAttempts = 0; correctAnswers = 0;
+        initialQuizCount = quizList.length; currentIdx = 0; totalAttempts = 0; correctAnswers = 0;
         document.getElementById('setup-screen').classList.add('hidden');
         document.getElementById('game-screen').classList.remove('hidden');
         loadQuestion();
@@ -226,32 +206,19 @@
         currentInput = ""; attemptsLeft = 3;
         updateUI();
         
-        const rawWord = q.en; 
-        
-        // 【修正核心】: 精準去重（保留原始大小寫做按鈕，比對時統一用小寫過濾）
-        let exactLetterSet = new Set(rawWord.replace(/[^a-zA-Z]/g, '').split('')); 
+        let exactLetterSet = new Set(q.en.replace(/[^a-zA-Z]/g, '').split('')); 
         let letters = Array.from(exactLetterSet);
-        
-        // 建立小寫字母池，用於避免干擾字母與答案字母重複
         let lowerCaseSet = new Set(letters.map(c => c.toLowerCase()));
-        
         const alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         while(letters.length < 10) {
             let rand = alpha[Math.floor(Math.random()*alpha.length)];
-            let randLower = rand.toLowerCase();
-            
-            // 如果此字母(不分大小寫)不在已經出現的字母中，才加入
-            if(!lowerCaseSet.has(randLower)) { 
-                letters.push(rand); 
-                lowerCaseSet.add(randLower); 
-            }
+            if(!lowerCaseSet.has(rand.toLowerCase())) { letters.push(rand); lowerCaseSet.add(rand.toLowerCase()); }
         }
         letters.sort(() => Math.random() - 0.5);
 
         let kbHTML = letters.map(c => `<button class="letter-btn" onclick="pressKey('${c}')">${c}</button>`).join('');
-        if (rawWord.includes(" ")) kbHTML += `<button class="letter-btn space-btn" onclick="pressKey(' ')">Space</button>`;
+        if (q.en.includes(" ")) kbHTML += `<button class="letter-btn space-btn" onclick="pressKey(' ')">Space</button>`;
         document.getElementById('keyboard').innerHTML = kbHTML;
-        
         setTimeout(() => playVoice(), 300);
     }
 
@@ -265,7 +232,6 @@
 
     function pressKey(char) {
         speakLetter(char);
-
         const target = quizList[currentIdx].en;
         currentInput += char;
         document.getElementById('user-input-display').innerText = currentInput.replace(/ /g, "_");
@@ -287,20 +253,49 @@
     function handleIncorrect() {
         attemptsLeft--;
         playSound('incorrect'); 
+        currentInput = ""; // 【修正】答錯立即清空輸入
         
         if (attemptsLeft > 0) {
-            document.getElementById('feedback').innerText = `❌ Incorrect! 剩下 ${attemptsLeft} 次`;
+            document.getElementById('feedback').innerText = `❌ Incorrect! 剩下 ${attemptsLeft} 次機會`;
             document.getElementById('feedback').style.color = "var(--error)";
             document.getElementById('attempt-info').innerText = `剩餘機會: ${attemptsLeft}`;
-            currentInput = "";
+            setTimeout(() => { document.getElementById('user-input-display').innerText = ""; }, 500);
         } else {
-            document.getElementById('feedback').innerText = `💡 答案是: ${quizList[currentIdx].en}`;
+            // 【修正】三次失敗後的強化教學邏輯
+            const targetWord = quizList[currentIdx].en;
+            document.getElementById('feedback').innerText = `💡 答案是: ${targetWord}`;
             document.getElementById('feedback').style.color = "var(--primary)";
-            quizList.push(quizList[currentIdx]); 
+            document.getElementById('user-input-display').innerText = targetWord;
             
-            setTimeout(() => playVoice(), 500); 
-            setTimeout(() => { currentIdx++; loadQuestion(); }, 2500);
+            quizList.push(quizList[currentIdx]); // 錯題循環
+            
+            // 先唸字母，再唸單字
+            teachWord(targetWord);
+            
+            setTimeout(() => { currentIdx++; loadQuestion(); }, 4000); // 延長時間讓語音唸完
         }
+    }
+
+    // 教學模式：逐字拼讀 + 整詞朗讀
+    function teachWord(word) {
+        synth.cancel();
+        const vIdx = document.getElementById('voice-select').value;
+        const rate = parseFloat(document.getElementById('voice-rate').value);
+
+        // 1. 逐字母拼讀
+        for(let char of word) {
+            const letterUtter = new SpeechSynthesisUtterance(char === ' ' ? 'space' : char);
+            if(voices[vIdx]) letterUtter.voice = voices[vIdx];
+            letterUtter.rate = 1.1;
+            synth.speak(letterUtter);
+        }
+
+        // 2. 整詞朗讀 (稍微停頓後)
+        const wordUtter = new SpeechSynthesisUtterance(word);
+        if(voices[vIdx]) wordUtter.voice = voices[vIdx];
+        wordUtter.rate = rate;
+        wordUtter.pitch = 1.1; // 稍微提高音調區隔
+        synth.speak(wordUtter);
     }
 
     function backspace() { currentInput = currentInput.slice(0, -1); updateUI(); }
