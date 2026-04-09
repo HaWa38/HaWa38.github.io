@@ -60,10 +60,11 @@
         </select>
     </div>
     <div class="settings-group">
-        <div class="group-title">3. 語音與語速</div>
+        <div class="group-title">3. 語音測試與設定</div>
         <select id="voice-select"></select>
         <input type="range" id="voice-rate" min="0.5" max="2.0" step="0.1" value="1.0" oninput="document.getElementById('rate-val').innerText=parseFloat(this.value).toFixed(1)">
-        <div style="text-align:right; font-size:0.8rem;">語速: <span id="rate-val" style="color:var(--primary)">1.0</span></div>
+        <div style="text-align:right; font-size:0.8rem; margin-bottom:10px;">語速: <span id="rate-val" style="color:var(--primary)">1.0</span></div>
+        <button class="btn-outline" onclick="testVoice()">🎵 測試語音效果</button>
     </div>
     <button class="btn-primary" id="start-btn" disabled onclick="initGame()">開始挑戰</button>
     <button class="btn-danger" onclick="exitProgram()">結束程式</button>
@@ -115,6 +116,16 @@
         document.getElementById('voice-select').innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
     }
     if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = initVoices;
+
+    // 測試語音功能
+    function testVoice() {
+        synth.cancel();
+        const utter = new SpeechSynthesisUtterance("Testing voice, how is the speed?");
+        const vIdx = document.getElementById('voice-select').value;
+        if(voices[vIdx]) utter.voice = voices[vIdx];
+        utter.rate = parseFloat(document.getElementById('voice-rate').value);
+        synth.speak(utter);
+    }
 
     function toggleLetterSound() {
         isLetterSoundEnabled = !isLetterSoundEnabled;
@@ -220,13 +231,22 @@
         currentInput = ""; attemptsLeft = 3;
         updateUI();
         
-        let exactLetterSet = new Set(q.en.replace(/[^a-zA-Z]/g, '').split('')); 
+        // 【修正】移除空格後的原始單字字母與符號
+        let rawWord = q.en.replace(/\s/g, ''); 
+        let exactLetterSet = new Set(rawWord.split('')); 
         let letters = Array.from(exactLetterSet);
+        
+        // 用於重複檢查的小寫集合
         let lowerCaseSet = new Set(letters.map(c => c.toLowerCase()));
+        
         const alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         while(letters.length < 10) {
             let rand = alpha[Math.floor(Math.random()*alpha.length)];
-            if(!lowerCaseSet.has(rand.toLowerCase())) { letters.push(rand); lowerCaseSet.add(rand.toLowerCase()); }
+            // 確保干擾字母不論大小寫都不會與單字已使用的重複
+            if(!lowerCaseSet.has(rand.toLowerCase())) { 
+                letters.push(rand); 
+                lowerCaseSet.add(rand.toLowerCase()); 
+            }
         }
         letters.sort(() => Math.random() - 0.5);
 
@@ -281,24 +301,18 @@
             document.getElementById('user-input-display').innerText = targetWord;
             
             quizList.push(quizList[currentIdx]); 
-            
-            // 進入朗讀答案模式
             speakAnswerOnly(targetWord);
         }
     }
 
-    // 【修正】移除拼音功能，僅朗讀單字並停頓
     function speakAnswerOnly(word) {
         synth.cancel();
         const vIdx = document.getElementById('voice-select').value;
         const mainRate = parseFloat(document.getElementById('voice-rate').value);
-
         const wordUtter = new SpeechSynthesisUtterance(word);
         if(voices[vIdx]) wordUtter.voice = voices[vIdx];
         wordUtter.rate = mainRate;
         wordUtter.pitch = 1.1;
-        
-        // 朗讀結束後，停頓 1.5 秒再換題
         wordUtter.onend = () => {
             setTimeout(() => {
                 currentIdx++;
@@ -306,7 +320,6 @@
                 else loadQuestion();
             }, 1500);
         };
-        
         synth.speak(wordUtter);
     }
 
