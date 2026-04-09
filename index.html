@@ -3,57 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>字母拼圖 - 讀取外部單字庫</title>
+    <title>字母拼圖 - GitHub Pages 自動讀檔版</title>
     <style>
         :root { --primary: #1a73e8; --success: #188038; --error: #d93025; --bg: #f8f9fa; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: var(--bg); padding: 20px; box-sizing: border-box; }
-        
-        .card { background: white; padding: 2.2rem; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; position: relative; }
+        .card { background: white; padding: 2.2rem; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; }
         .hidden { display: none !important; }
-
         h1 { color: var(--primary); font-size: 2rem; margin-bottom: 5px; }
         .subtitle { color: #5f6368; margin-bottom: 20px; font-size: 0.9rem; }
-
-        .file-upload-zone { border: 2px dashed var(--primary); padding: 20px; border-radius: 16px; margin-bottom: 20px; background: #e8f0fe; cursor: pointer; }
-
         .settings-group { background: #f1f3f4; padding: 15px; border-radius: 16px; margin-bottom: 15px; border: 1px solid #e0e0e0; text-align: left; }
         .group-title { font-size: 0.9rem; font-weight: bold; margin-bottom: 10px; color: #3c4043; text-align: center; }
-        
         .setting-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.85rem; }
         .setting-row label { flex: 1; }
-        .setting-row input[type="range"] { flex: 2; }
         select { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #dadce0; margin-top: 5px; font-size: 0.8rem; }
-
         .range-inputs { display: flex; align-items: center; justify-content: center; gap: 10px; }
         .range-inputs input[type="number"] { width: 60px; padding: 8px; border: 1px solid #dadce0; border-radius: 8px; text-align: center; }
-
-        button { padding: 12px 24px; font-size: 1rem; cursor: pointer; border-radius: 12px; border: none; transition: 0.2s; font-weight: 600; }
-        .btn-main { background: var(--primary); color: white; width: 100%; margin-bottom: 12px; }
-        .btn-outline { background: white; border: 2px solid #dadce0; color: #3c4043; width: 100%; margin-bottom: 12px; }
-        .btn-danger { background: #fce8e6; color: #d93025; width: 100%; }
-
-        .progress { font-size: 0.9rem; color: #70757a; margin-bottom: 1rem; font-weight: bold; }
-        .spell-display { font-size: 2.2rem; border-bottom: 3px solid var(--primary); margin: 15px auto; min-height: 3.5rem; width: 90%; letter-spacing: 4px; color: var(--primary); font-weight: bold; display: flex; align-items: center; justify-content: center; }
+        button { padding: 12px 24px; font-size: 1rem; cursor: pointer; border-radius: 12px; border: none; transition: 0.2s; font-weight: 600; width: 100%; }
+        .btn-main { background: var(--primary); color: white; margin-bottom: 12px; }
+        .btn-outline { background: white; border: 2px solid #dadce0; color: #3c4043; margin-bottom: 12px; }
+        .progress { font-size: 0.9rem; color: #70757a; margin-bottom: 1rem; }
+        .spell-display { font-size: 2.2rem; border-bottom: 3px solid var(--primary); margin: 15px auto; min-height: 3.5rem; letter-spacing: 4px; color: var(--primary); font-weight: bold; display: flex; align-items: center; justify-content: center; }
         .letter-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
         .letter-btn { padding: 15px 5px; font-size: 1.3rem; background: #fff; border: 2px solid #dadce0; border-radius: 10px; cursor: pointer; }
-        
-        .chinese-hint { font-size: 1.6rem; font-weight: 700; margin: 10px 0; min-height: 2rem; color: #202124; }
-        
+        .chinese-hint { font-size: 1.6rem; font-weight: 700; margin: 10px 0; color: #202124; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
-        .shake { animation: shake 0.2s cubic-bezier(.36,.07,.19,.97) both; }
+        .shake { animation: shake 0.2s both; }
     </style>
 </head>
 <body>
 
 <div class="card" id="home-screen">
     <h1>單字拼圖挑戰</h1>
-    <p class="subtitle" id="file-status">請點擊下方讀取「單字庫.TXT」檔案</p>
+    <p class="subtitle" id="file-status">正在嘗試連線單字庫...</p>
     
-    <div class="file-upload-zone" onclick="document.getElementById('file-input').click()">
-        <strong>📁 點此讀取單字庫.TXT</strong>
-        <input type="file" id="file-input" accept=".txt" style="display:none" onchange="handleFileSelect(this)">
-    </div>
-
     <div class="settings-group">
         <div class="group-title">1. 設定測驗範圍 (題號)</div>
         <div class="range-inputs">
@@ -69,10 +51,10 @@
             <label>語速 (Rate)</label>
             <input type="range" id="voice-rate" min="0.5" max="1.5" step="0.1" value="1">
         </div>
-        <select id="voice-select"><option value="">載入聲音列表中...</option></select>
+        <select id="voice-select"><option value="">讀取語音中...</option></select>
     </div>
 
-    <button class="btn-main" id="start-btn" onclick="startQuiz()" disabled>請先載入單字庫</button>
+    <button class="btn-main" id="start-btn" onclick="startQuiz()" disabled>讀取單字庫中...</button>
 </div>
 
 <div class="card hidden" id="quiz-screen">
@@ -90,8 +72,8 @@
 
 <div class="card hidden" id="result-screen">
     <h2>測驗完成！</h2>
-    <div id="stats-info" style="margin: 20px 0; line-height: 1.8;"></div>
-    <button class="btn-main" onclick="location.reload()">重新開始</button>
+    <div id="stats-info" style="margin: 20px 0;"></div>
+    <button class="btn-main" onclick="location.reload()">回首頁</button>
 </div>
 
 <script>
@@ -103,56 +85,48 @@
     let totalAttempts = 0;
     let isQuizActive = false;
 
-    // 語音系統
-    let synth = window.speechSynthesis;
-    let voices = [];
-    function populateVoiceList() {
-        voices = synth.getVoices().filter(v => v.lang.includes('en'));
-        const voiceSelect = document.getElementById('voice-select');
-        voiceSelect.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
-    }
-    if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = populateVoiceList;
-
-    // 讀取外部檔案邏輯
-    function handleFileSelect(input) {
-        const file = input.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const content = e.target.result;
-            parseTxtData(content);
-        };
-        reader.readAsText(file);
+    // 1. 自動抓取同目錄下的 單字庫.TXT
+    async function autoLoadFile() {
+        const fileName = "單字庫.TXT";
+        try {
+            const response = await fetch(fileName);
+            if (!response.ok) throw new Error("找不到檔案");
+            const text = await response.text();
+            parseTxtData(text);
+        } catch (error) {
+            document.getElementById('file-status').innerHTML = "⚠️ 無法自動讀取「單字庫.TXT」<br><small>請確認檔案已上傳至 GitHub 且檔名正確</small>";
+            console.error(error);
+        }
     }
 
     function parseTxtData(text) {
-        // 分行處理，並移除 等標記與多餘空白
         const lines = text.split('\n');
         wordBank = [];
-
         lines.forEach(line => {
-            // 移除標記內容如 
             let cleanLine = line.replace(/\/gi, '').trim();
             if (!cleanLine || cleanLine.startsWith('等級,')) return;
-
             const parts = cleanLine.split(',');
             if (parts.length >= 3) {
-                const en = parts[1].trim();
-                const zh = parts[2].trim();
-                wordBank.push({ en, zh });
+                wordBank.push({ en: parts[1].trim(), zh: parts[2].trim() });
             }
         });
 
         if (wordBank.length > 0) {
-            document.getElementById('file-status').innerHTML = `✅ 已成功讀取 ${wordBank.length} 個單字`;
+            document.getElementById('file-status').textContent = `✅ 單字庫連線成功：共 ${wordBank.length} 個單字`;
             document.getElementById('range-end').value = wordBank.length;
             document.getElementById('start-btn').disabled = false;
             document.getElementById('start-btn').textContent = "開始測驗";
-        } else {
-            alert("檔案格式不符，請確認是否為單字庫.TXT");
         }
     }
+
+    // 語音與遊戲邏輯
+    let synth = window.speechSynthesis;
+    let voices = [];
+    function populateVoiceList() {
+        voices = synth.getVoices().filter(v => v.lang.includes('en'));
+        document.getElementById('voice-select').innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
+    }
+    if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = populateVoiceList;
 
     function speakWord() {
         if (!currentQuestions[0]) return;
@@ -167,91 +141,74 @@
     function startQuiz() {
         const start = parseInt(document.getElementById('range-start').value) - 1;
         const end = parseInt(document.getElementById('range-end').value);
-        
         currentQuestions = wordBank.slice(start, end).sort(() => Math.random() - 0.5);
         initialCount = currentQuestions.length;
         totalAttempts = 0;
         isQuizActive = true;
-        showScreen('quiz-screen');
+        document.getElementById('home-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
         showQuestion();
     }
 
     function showQuestion() {
-        if (currentQuestions.length === 0) { endQuiz(); return; }
-        userSpelling = "";
-        wrongCount = 0;
+        if (currentQuestions.length === 0) {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('stats-info').innerHTML = `總題數：${initialCount}<br>嘗試次數：${totalAttempts}<br>熟練度：${Math.round((initialCount/totalAttempts)*100)}%`;
+            return;
+        }
+        userSpelling = ""; wrongCount = 0;
         const data = currentQuestions[0];
-        document.getElementById('message-box').textContent = "";
-        document.getElementById('current-spelling').textContent = "";
         document.getElementById('chinese-display').textContent = data.zh;
-        document.getElementById('progress-text').textContent = `剩餘：${currentQuestions.length} / 範圍總數：${initialCount}`;
-        
+        document.getElementById('current-spelling').textContent = "";
+        document.getElementById('message-box').textContent = "";
+        document.getElementById('progress-text').textContent = `進度：${currentQuestions.length} / ${initialCount}`;
         generateLetters(data.en.toLowerCase());
         speakWord();
     }
 
     function generateLetters(en) {
-        let cleanWord = en.replace(/[^a-z]/g, ''); // 只拼英文字母部分
-        let letters = cleanWord.split('');
-        const alpha = "abcdefghijklmnopqrstuvwxyz";
-        while(letters.length < cleanWord.length + 3) {
-            letters.push(alpha[Math.floor(Math.random()*26)]);
-        }
+        let target = en.replace(/[^a-z]/g, '');
+        let letters = target.split('');
+        while(letters.length < target.length + 3) letters.push("abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random()*26)]);
         letters.sort(() => Math.random() - 0.5);
-        
-        const grid = document.getElementById('letter-buttons');
-        grid.innerHTML = letters.map(char => `<button class="letter-btn" onclick="handleInput('${char}')">${char}</button>`).join('');
+        document.getElementById('letter-buttons').innerHTML = letters.map(c => `<button class="letter-btn" onclick="handleInput('${c}')">${c}</button>`).join('');
     }
 
-    function handleInput(char) {
-        userSpelling += char;
-        const display = document.getElementById('current-spelling');
-        display.textContent = userSpelling.toUpperCase();
-        
+    function handleInput(c) {
+        userSpelling += c;
+        document.getElementById('current-spelling').textContent = userSpelling.toUpperCase();
         const target = currentQuestions[0].en.toLowerCase().replace(/[^a-z]/g, '');
-        if (userSpelling.length === target.length) checkAnswer(target);
-    }
-
-    function checkAnswer(target) {
-        totalAttempts++;
-        if (userSpelling.toLowerCase() === target) {
-            document.getElementById('message-box').textContent = "正確！🌟";
-            document.getElementById('message-box').style.color = "var(--success)";
-            currentQuestions.shift();
-            setTimeout(showQuestion, 800);
-        } else {
-            wrongCount++;
-            const display = document.getElementById('current-spelling');
-            display.classList.add('shake');
-            setTimeout(() => display.classList.remove('shake'), 200);
-            
-            if (wrongCount >= 3) {
-                document.getElementById('message-box').textContent = `正解：${currentQuestions[0].en.toUpperCase()}`;
-                document.getElementById('message-box').style.color = "var(--error)";
-                const item = currentQuestions.shift();
-                currentQuestions.push(item);
-                setTimeout(showQuestion, 2000);
+        if (userSpelling.length === target.length) {
+            totalAttempts++;
+            if (userSpelling === target) {
+                document.getElementById('message-box').textContent = "正確！🌟";
+                currentQuestions.shift();
+                setTimeout(showQuestion, 800);
             } else {
-                userSpelling = "";
-                display.textContent = "";
+                wrongCount++;
+                document.getElementById('current-spelling').classList.add('shake');
+                setTimeout(() => document.getElementById('current-spelling').classList.remove('shake'), 200);
+                if (wrongCount >= 3) {
+                    document.getElementById('message-box').textContent = `正解：${currentQuestions[0].en.toUpperCase()}`;
+                    currentQuestions.push(currentQuestions.shift());
+                    setTimeout(showQuestion, 2000);
+                } else {
+                    userSpelling = ""; document.getElementById('current-spelling').textContent = "";
+                }
             }
         }
     }
 
-    function backspace() { userSpelling = userSpelling.slice(0, -1); document.getElementById('current-spelling').textContent = userSpelling.toUpperCase(); }
+    function backspace() { userSpelling = userSpelling.slice(0,-1); document.getElementById('current-spelling').textContent = userSpelling.toUpperCase(); }
     function clearSpelling() { userSpelling = ""; document.getElementById('current-spelling').textContent = ""; }
-    function showScreen(id) { document.querySelectorAll('.card').forEach(c => c.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
-
-    function endQuiz() {
-        showScreen('result-screen');
-        const score = Math.round((initialCount / totalAttempts) * 100);
-        document.getElementById('stats-info').innerHTML = `總題數：${initialCount}<br>總嘗試次數：${totalAttempts}<br>熟練度：${score}%`;
-    }
+    
+    // 初始化執行自動讀檔
+    autoLoadFile();
 
     window.addEventListener('keydown', (e) => {
         if (!isQuizActive) return;
         if (e.key === 'Backspace') backspace();
-        if (e.key === 'Escape') clearSpelling();
         if (e.key.length === 1 && /[a-z]/i.test(e.key)) handleInput(e.key.toLowerCase());
     });
 </script>
