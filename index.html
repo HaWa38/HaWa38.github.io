@@ -13,7 +13,6 @@
         .hidden { display: none !important; }
         h1 { color: var(--primary); margin: 0 0 1rem 0; font-size: 1.5rem; }
         
-        /* 設定區域樣式 */
         .settings-group { background: #f1f3f4; padding: 10px; border-radius: 12px; border: 1px solid #e0e0e0; text-align: left; margin-bottom: 10px; }
         .group-title { font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; color: #3c4043; }
         select, input[type="number"], input[type="range"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #dadce0; font-size: 1rem; margin-bottom: 5px; }
@@ -21,7 +20,7 @@
         /* 遊戲頂部工具欄 (三欄佈局) */
         .game-header { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; width: 100%; margin-bottom: 15px; }
 
-        /* 字母與顯示區專用字型：確保 I 與 l 可分辨 */
+        /* 等寬字型區：確保 I 與 l 可分辨 */
         .monospace-font { font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important; font-weight: bold; }
 
         .chinese-hint { font-size: 1.8rem; font-weight: bold; margin: 10px 0; color: #202124; }
@@ -105,7 +104,6 @@
     <div id="attempt-info" style="font-size: 0.8rem; color: #666;">剩餘機會: 3</div>
     
     <div class="spell-display monospace-font" id="user-input-display"></div>
-    
     <div class="letter-grid monospace-font" id="keyboard"></div>
     
     <div style="display: flex; gap: 10px; margin-top: 20px;">
@@ -247,21 +245,25 @@
         currentInput = ""; attemptsLeft = 3;
         updateUI();
         
-        // 抓取單字中的所有不重複字元（含符號如 -）
+        // 抓取單字中的所有字元（保留原始大小寫與符號）
         let rawChars = q.en.replace(/\s/g, '').split('');
-        let exactLetterSet = new Set(rawChars); 
-        let letters = Array.from(exactLetterSet);
+        let letters = Array.from(new Set(rawChars));
         
-        // 生成干擾字：確保大小寫都不衝突
-        let lowerCaseSet = new Set(letters.map(c => c.toLowerCase()));
-        const alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        while(letters.length < 10) {
-            let rand = alpha[Math.floor(Math.random()*alpha.length)];
-            if(!lowerCaseSet.has(rand.toLowerCase())) { 
-                letters.push(rand); 
-                lowerCaseSet.add(rand.toLowerCase()); 
+        // 生成干擾字：【修正】優先選用小寫字母
+        let lowerUsedSet = new Set(letters.map(c => c.toLowerCase()));
+        const lowerAlpha = "abcdefghijklmnopqrstuvwxyz";
+        
+        // 將 a-z 打亂順序，從中挑選沒被用過的字母填滿至 10 個按鈕
+        let shuffledLower = lowerAlpha.split('').sort(() => Math.random() - 0.5);
+        
+        for (let char of shuffledLower) {
+            if (letters.length >= 10) break;
+            if (!lowerUsedSet.has(char)) {
+                letters.push(char);
+                lowerUsedSet.add(char);
             }
         }
+        
         letters.sort(() => Math.random() - 0.5);
 
         let kbHTML = letters.map(c => `<button class="letter-btn" onclick="pressKey('${c}')">${c}</button>`).join('');
