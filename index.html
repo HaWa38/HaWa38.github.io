@@ -205,7 +205,7 @@
         const mode = document.getElementById('quiz-mode').value;
         let start = parseInt(document.getElementById('r-start').value) - 1;
         let end = parseInt(document.getElementById('r-end').value);
-        if (isNaN(start) || isNaN(end) || start < 0 || end > wordData[lvl].length || start >= end) return alert("範圍範圍錯誤");
+        if (isNaN(start) || isNaN(end) || start < 0 || end > wordData[lvl].length || start >= end) return alert("範圍錯誤");
 
         let baseList = wordData[lvl].slice(start, end).sort(() => Math.random() - 0.5);
         quizList = (mode === "random10") ? baseList.slice(0, 10) : baseList;
@@ -282,38 +282,29 @@
             
             quizList.push(quizList[currentIdx]); 
             
-            // 進入強化教學模式
-            teachWord(targetWord);
+            // 進入朗讀答案模式
+            speakAnswerOnly(targetWord);
         }
     }
 
-    function teachWord(word) {
+    // 【修正】移除拼音功能，僅朗讀單字並停頓
+    function speakAnswerOnly(word) {
         synth.cancel();
         const vIdx = document.getElementById('voice-select').value;
         const mainRate = parseFloat(document.getElementById('voice-rate').value);
 
-        // 1. 逐字母拼讀 (速度加快到 1.8)
-        for(let i = 0; i < word.length; i++) {
-            const char = word[i];
-            const letterUtter = new SpeechSynthesisUtterance(char === ' ' ? 'space' : char);
-            if(voices[vIdx]) letterUtter.voice = voices[vIdx];
-            letterUtter.rate = 1.8; // 加快拼音速度
-            synth.speak(letterUtter);
-        }
-
-        // 2. 整詞朗讀 (稍微提高音調並接在拼音後)
         const wordUtter = new SpeechSynthesisUtterance(word);
         if(voices[vIdx]) wordUtter.voice = voices[vIdx];
         wordUtter.rate = mainRate;
         wordUtter.pitch = 1.1;
         
-        // 3. 讀完單字後，「停一下」再出下一題
+        // 朗讀結束後，停頓 1.5 秒再換題
         wordUtter.onend = () => {
             setTimeout(() => {
                 currentIdx++;
                 if (currentIdx >= quizList.length) showResult();
                 else loadQuestion();
-            }, 1500); // 停頓 1.5 秒
+            }, 1500);
         };
         
         synth.speak(wordUtter);
