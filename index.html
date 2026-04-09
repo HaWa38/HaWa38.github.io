@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>字母拼圖 - GitHub Pages 修復版</title>
+    <title>字母拼圖 - 等級篩選版</title>
     <style>
         :root { --primary: #1a73e8; --success: #188038; --error: #d93025; --bg: #f8f9fa; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: var(--bg); padding: 20px; box-sizing: border-box; }
         .card { background: white; padding: 2.2rem; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; }
         .hidden { display: none !important; }
-        h1 { color: var(--primary); font-size: 2rem; margin-bottom: 5px; }
-        .subtitle { color: #5f6368; margin-bottom: 20px; font-size: 0.9rem; }
+        h1 { color: var(--primary); font-size: 1.8rem; margin-bottom: 5px; }
+        .subtitle { color: #5f6368; margin-bottom: 20px; font-size: 0.9rem; font-weight: bold; }
         .settings-group { background: #f1f3f4; padding: 15px; border-radius: 16px; margin-bottom: 15px; border: 1px solid #e0e0e0; text-align: left; }
-        .group-title { font-size: 0.9rem; font-weight: bold; margin-bottom: 10px; color: #3c4043; text-align: center; }
+        .group-title { font-size: 0.9rem; font-weight: bold; margin-bottom: 10px; color: #3c4043; }
         .setting-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.85rem; }
-        .setting-row label { flex: 1; }
-        select { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #dadce0; margin-top: 5px; font-size: 0.8rem; }
-        .range-inputs { display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .range-inputs input[type="number"] { width: 60px; padding: 8px; border: 1px solid #dadce0; border-radius: 8px; text-align: center; }
+        .setting-row label { flex: 1; min-width: 70px; }
+        select, input[type="number"] { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #dadce0; font-size: 0.9rem; }
+        .range-inputs { display: flex; align-items: center; gap: 5px; }
         button { padding: 12px 24px; font-size: 1rem; cursor: pointer; border-radius: 12px; border: none; transition: 0.2s; font-weight: 600; width: 100%; }
         .btn-main { background: var(--primary); color: white; margin-bottom: 12px; }
         .btn-main:disabled { background: #ccc; cursor: not-allowed; }
@@ -35,28 +34,35 @@
 
 <div class="card" id="home-screen">
     <h1>單字拼圖挑戰</h1>
-    <p class="subtitle" id="file-status">正在載入資源...</p>
+    <p class="subtitle" id="file-status">正在載入單字庫...</p>
     
     <div class="settings-group">
-        <div class="group-title">1. 設定測驗範圍 (題號)</div>
-        <div class="range-inputs">
-            <input type="number" id="range-start" value="1" min="1">
-            <span>到</span>
-            <input type="number" id="range-end" value="10">
-        </div>
+        <div class="group-title">1. 選擇單字等級</div>
+        <select id="level-select" onchange="updateRangeByLevel()">
+            <option value="">載入中...</option>
+        </select>
     </div>
 
     <div class="settings-group">
-        <div class="group-title">2. 語音發音設定</div>
-        <div class="setting-row">
-            <label>語速 (Rate)</label>
-            <input type="range" id="voice-rate" min="0.5" max="1.5" step="0.1" value="1">
+        <div class="group-title">2. 設定測驗範圍 (該等級題號)</div>
+        <div class="range-inputs">
+            <input type="number" id="range-start" value="1">
+            <span>至</span>
+            <input type="number" id="range-end" value="10">
         </div>
-        <select id="voice-select"><option value="">等待語音引擎中...</option></select>
-        <button class="btn-outline" style="font-size: 0.7rem; padding: 5px; margin-top: 8px; width: auto;" onclick="populateVoiceList()">🔄 重新整理聲音列表</button>
+        <p style="font-size: 0.75rem; color: #666; margin-top: 8px;" id="level-info"></p>
     </div>
 
-    <button class="btn-main" id="start-btn" onclick="startQuiz()" disabled>正在載入單字庫...</button>
+    <div class="settings-group">
+        <div class="group-title">3. 語音設定</div>
+        <div class="setting-row">
+            <label>語速</label>
+            <input type="range" id="voice-rate" min="0.5" max="1.5" step="0.1" value="1" style="flex:2">
+        </div>
+        <select id="voice-select"><option value="">等待語音引擎...</option></select>
+    </div>
+
+    <button class="btn-main" id="start-btn" onclick="startQuiz()" disabled>等待資源載入...</button>
 </div>
 
 <div class="card hidden" id="quiz-screen">
@@ -74,18 +80,19 @@
 
 <div class="card hidden" id="result-screen">
     <h2>測驗完成！</h2>
-    <div id="stats-info" style="margin: 20px 0;"></div>
+    <div id="stats-info" style="margin: 20px 0; line-height: 1.6;"></div>
     <button class="btn-main" onclick="location.reload()">回首頁</button>
 </div>
 
 <script>
-    let wordBank = [];
+    let fullWordBank = []; // 原始完整資料
     let currentQuestions = [];
     let initialCount = 0;
     let userSpelling = "";
     let wrongCount = 0;
     let totalAttempts = 0;
     let isQuizActive = false;
+    let levels = {}; // 存放各等級的索引範圍
 
     // --- 語音系統修復 ---
     let synth = window.speechSynthesis;
@@ -94,81 +101,95 @@
     function populateVoiceList() {
         voices = synth.getVoices();
         const voiceSelect = document.getElementById('voice-select');
-        
-        // 篩選英文語音
         const enVoices = voices.filter(v => v.lang.includes('en'));
         
         if (enVoices.length > 0) {
             voiceSelect.innerHTML = enVoices.map((v, i) => 
-                `<option value="${voices.indexOf(v)}">${v.name} (${v.lang})</option>`
+                `<option value="${voices.indexOf(v)}">${v.name}</option>`
             ).join('');
-            document.getElementById('file-status').textContent = wordBank.length > 0 ? `✅ 準備就緒` : `✅ 語音已就緒，等待單字庫...`;
-        } else if (voices.length > 0) {
-            // 如果找不到英文，顯示所有語音
-            voiceSelect.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
         }
     }
 
-    // 修復 Chrome/Safari 不觸發 voiceschanged 的問題
     if (speechSynthesis.onvoiceschanged !== undefined) {
         speechSynthesis.onvoiceschanged = populateVoiceList;
     }
-    // 強制在頁面載入後執行一次
-    window.onload = () => {
-        populateVoiceList();
-        autoLoadFile();
-    };
 
-    // --- 檔案讀取優化 ---
+    // --- 檔案讀取與等級篩選 ---
     async function autoLoadFile() {
         const fileName = "單字庫.TXT";
         try {
-            // 加入時間戳避免 GitHub Pages 快取舊版本
             const response = await fetch(`${fileName}?t=${Date.now()}`);
-            if (!response.ok) throw new Error("File not found");
+            if (!response.ok) throw new Error();
             const text = await response.text();
-            parseTxtData(text);
+            processData(text);
         } catch (error) {
-            document.getElementById('file-status').innerHTML = "⚠️ 找不到「單字庫.TXT」<br><small>請確認檔案已上傳至 GitHub 根目錄</small>";
+            document.getElementById('file-status').textContent = "⚠️ 找不到單字庫.TXT，請確認檔案位置。";
         }
     }
 
-    function parseTxtData(text) {
+    function processData(text) {
         const lines = text.split(/\r?\n/);
-        wordBank = [];
-        lines.forEach(line => {
-            let cleanLine = line.trim();
-            if (!cleanLine || cleanLine.startsWith('等級,')) return;
+        fullWordBank = [];
+        levels = {};
+
+        lines.forEach((line) => {
+            let cleanLine = line.replace(/\/gi, '').trim();
+            if (!cleanLine || cleanLine.startsWith('等級')) return;
+
             const parts = cleanLine.split(',');
             if (parts.length >= 3) {
-                wordBank.push({ en: parts[1].trim(), zh: parts[2].trim() });
+                const levelName = parts[0].trim();
+                const wordObj = { en: parts[1].trim(), zh: parts[2].trim(), level: levelName };
+                fullWordBank.push(wordObj);
+
+                // 記錄等級出現的起始與結束位置
+                if (!levels[levelName]) {
+                    levels[levelName] = { start: fullWordBank.length, end: fullWordBank.length };
+                } else {
+                    levels[levelName].end = fullWordBank.length;
+                }
             }
         });
 
-        if (wordBank.length > 0) {
-            document.getElementById('range-end').value = wordBank.length;
+        if (fullWordBank.length > 0) {
+            const levelSelect = document.getElementById('level-select');
+            levelSelect.innerHTML = Object.keys(levels).map(lvl => `<option value="${lvl}">${lvl}</option>`).join('');
+            
+            updateRangeByLevel();
+            
+            document.getElementById('file-status').textContent = `✅ 已載入 ${fullWordBank.length} 個單字`;
             document.getElementById('start-btn').disabled = false;
             document.getElementById('start-btn').textContent = "開始測驗";
-            document.getElementById('file-status').textContent = `✅ 單字庫載入成功 (${wordBank.length} 個)`;
+        }
+        populateVoiceList(); // 再次嘗試載入語音
+    }
+
+    function updateRangeByLevel() {
+        const selectedLvl = document.getElementById('level-select').value;
+        const info = levels[selectedLvl];
+        if (info) {
+            // 讓使用者看見的是該等級內的相對題號 (1~N)
+            const count = info.end - info.start + 1;
+            document.getElementById('range-start').value = 1;
+            document.getElementById('range-end').value = count;
+            document.getElementById('range-start').max = count;
+            document.getElementById('range-end').max = count;
+            document.getElementById('level-info').textContent = `* 此等級共有 ${count} 個單字`;
         }
     }
 
-    // --- 遊戲邏輯保持不變 ---
-    function speakWord() {
-        if (!currentQuestions[0]) return;
-        synth.cancel();
-        const utter = new SpeechSynthesisUtterance(currentQuestions[0].en.replace(/\(.*\)/, ''));
-        const voiceSelect = document.getElementById('voice-select');
-        if (voices[voiceSelect.value]) utter.voice = voices[voiceSelect.value];
-        utter.rate = document.getElementById('voice-rate').value;
-        synth.speak(utter);
-    }
-
+    // --- 遊戲邏輯 ---
     function startQuiz() {
-        const start = Math.max(0, parseInt(document.getElementById('range-start').value) - 1);
-        const end = Math.min(wordBank.length, parseInt(document.getElementById('range-end').value));
+        const selectedLvl = document.getElementById('level-select').value;
+        const levelData = fullWordBank.filter(w => w.level === selectedLvl);
         
-        currentQuestions = wordBank.slice(start, end).sort(() => Math.random() - 0.5);
+        const start = Math.max(1, parseInt(document.getElementById('range-start').value)) - 1;
+        const end = Math.min(levelData.length, parseInt(document.getElementById('range-end').value));
+        
+        currentQuestions = levelData.slice(start, end).sort(() => Math.random() - 0.5);
+        
+        if (currentQuestions.length === 0) { alert("請設定正確的範圍！"); return; }
+
         initialCount = currentQuestions.length;
         totalAttempts = 0;
         isQuizActive = true;
@@ -181,7 +202,8 @@
         if (currentQuestions.length === 0) {
             document.getElementById('quiz-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.remove('hidden');
-            document.getElementById('stats-info').innerHTML = `範圍題數：${initialCount}<br>嘗試次數：${totalAttempts}<br>熟練度：${Math.round((initialCount/totalAttempts)*100)}%`;
+            const score = Math.round((initialCount/totalAttempts)*100);
+            document.getElementById('stats-info').innerHTML = `測驗等級：${document.getElementById('level-select').value}<br>總題數：${initialCount}<br>嘗試次數：${totalAttempts}<br><strong>熟練度：${score}%</strong>`;
             return;
         }
         userSpelling = ""; wrongCount = 0;
@@ -189,16 +211,26 @@
         document.getElementById('chinese-display').textContent = data.zh;
         document.getElementById('current-spelling').textContent = "";
         document.getElementById('message-box').textContent = "";
-        document.getElementById('progress-text').textContent = `進度：${currentQuestions.length} / ${initialCount}`;
+        document.getElementById('progress-text').textContent = `剩餘：${currentQuestions.length} / ${initialCount}`;
         generateLetters(data.en.toLowerCase());
         speakWord();
+    }
+
+    function speakWord() {
+        if (!currentQuestions[0]) return;
+        synth.cancel();
+        const utter = new SpeechSynthesisUtterance(currentQuestions[0].en.replace(/\(.*\)/, ''));
+        const voiceIndex = document.getElementById('voice-select').value;
+        if (voices[voiceIndex]) utter.voice = voices[voiceIndex];
+        utter.rate = document.getElementById('voice-rate').value;
+        synth.speak(utter);
     }
 
     function generateLetters(en) {
         let target = en.replace(/[^a-z]/g, '');
         let letters = target.split('');
         const alpha = "abcdefghijklmnopqrstuvwxyz";
-        while(letters.length < target.length + 3) letters.push(alpha[Math.floor(Math.random()*26)]);
+        while(letters.length < target.length + 4) letters.push(alpha[Math.floor(Math.random()*26)]);
         letters.sort(() => Math.random() - 0.5);
         document.getElementById('letter-buttons').innerHTML = letters.map(c => `<button class="letter-btn" onclick="handleInput('${c}')">${c}</button>`).join('');
     }
@@ -234,6 +266,7 @@
     function backspace() { userSpelling = userSpelling.slice(0,-1); document.getElementById('current-spelling').textContent = userSpelling.toUpperCase(); }
     function clearSpelling() { userSpelling = ""; document.getElementById('current-spelling').textContent = ""; }
 
+    window.onload = autoLoadFile;
     window.addEventListener('keydown', (e) => {
         if (!isQuizActive) return;
         if (e.key === 'Backspace') backspace();
