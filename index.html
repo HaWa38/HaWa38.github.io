@@ -3,297 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>字母拼圖 - 本地&網頁通用版</title>
+    <title>字母拼圖 - 讀取外部單字庫</title>
     <style>
         :root { --primary: #1a73e8; --success: #188038; --error: #d93025; --bg: #f8f9fa; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: var(--bg); padding: 20px; box-sizing: border-box; }
-        .card { background: white; padding: 2.2rem; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; }
-        .hidden { display: none !important; }
-        h1 { color: var(--primary); font-size: 1.8rem; margin: 0 0 10px 0; }
         
-        /* 狀態列設計 */
-        .status-box { padding: 15px; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem; border: 1px solid #ddd; }
-        .status-loading { background: #e8f0fe; color: #1967d2; border-color: #d2e3fc; }
-        .status-manual { background: #fff4e5; color: #663c00; border-color: #ffe1bb; border: 2px dashed #ff9800; }
-        .status-ok { background: #e6f4ea; color: #137333; border-color: #ceead6; }
+        .card { background: white; padding: 2.2rem; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; position: relative; }
+        .hidden { display: none !important; }
+
+        h1 { color: var(--primary); font-size: 2rem; margin-bottom: 5px; }
+        .subtitle { color: #5f6368; margin-bottom: 20px; font-size: 0.9rem; }
+
+        .file-upload-zone { border: 2px dashed var(--primary); padding: 20px; border-radius: 16px; margin-bottom: 20px; background: #e8f0fe; cursor: pointer; }
 
         .settings-group { background: #f1f3f4; padding: 15px; border-radius: 16px; margin-bottom: 15px; border: 1px solid #e0e0e0; text-align: left; }
-        .group-title { font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; color: #5f6368; text-transform: uppercase; }
+        .group-title { font-size: 0.9rem; font-weight: bold; margin-bottom: 10px; color: #3c4043; text-align: center; }
         
-        select, input[type="number"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #dadce0; font-size: 1rem; margin-top: 5px; box-sizing: border-box; }
-        .range-inputs { display: flex; align-items: center; gap: 8px; }
-        
-        button { padding: 12px 24px; font-size: 1rem; cursor: pointer; border-radius: 12px; border: none; transition: 0.2s; font-weight: 600; width: 100%; }
-        .btn-main { background: var(--primary); color: white; margin-bottom: 12px; }
-        .btn-main:disabled { background: #dadce0; color: #70757a; cursor: not-allowed; }
-        .btn-outline { background: white; border: 2px solid #dadce0; color: #3c4043; margin-bottom: 12px; }
-        
-        /* 遊戲介面 */
-        .chinese-hint { font-size: 1.8rem; font-weight: 700; margin: 15px 0; color: #202124; min-height: 2.2rem; }
-        .spell-display { font-size: 2.4rem; border-bottom: 3px solid var(--primary); margin: 15px auto; min-height: 3.5rem; letter-spacing: 4px; color: var(--primary); font-weight: bold; display: flex; align-items: center; justify-content: center; }
+        .setting-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.85rem; }
+        .setting-row label { flex: 1; }
+        .setting-row input[type="range"] { flex: 2; }
+        select { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #dadce0; margin-top: 5px; font-size: 0.8rem; }
+
+        .range-inputs { display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .range-inputs input[type="number"] { width: 60px; padding: 8px; border: 1px solid #dadce0; border-radius: 8px; text-align: center; }
+
+        button { padding: 12px 24px; font-size: 1rem; cursor: pointer; border-radius: 12px; border: none; transition: 0.2s; font-weight: 600; }
+        .btn-main { background: var(--primary); color: white; width: 100%; margin-bottom: 12px; }
+        .btn-outline { background: white; border: 2px solid #dadce0; color: #3c4043; width: 100%; margin-bottom: 12px; }
+        .btn-danger { background: #fce8e6; color: #d93025; width: 100%; }
+
+        .progress { font-size: 0.9rem; color: #70757a; margin-bottom: 1rem; font-weight: bold; }
+        .spell-display { font-size: 2.2rem; border-bottom: 3px solid var(--primary); margin: 15px auto; min-height: 3.5rem; width: 90%; letter-spacing: 4px; color: var(--primary); font-weight: bold; display: flex; align-items: center; justify-content: center; }
         .letter-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
-        .letter-btn { padding: 15px 5px; font-size: 1.4rem; background: #fff; border: 2px solid #dadce0; border-radius: 10px; cursor: pointer; box-shadow: 0 3px 0 #dadce0; }
-        .letter-btn:active { transform: translateY(2px); box-shadow: none; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
-        .shake { animation: shake 0.2s both; }
+        .letter-btn { padding: 15px 5px; font-size: 1.3rem; background: #fff; border: 2px solid #dadce0; border-radius: 10px; cursor: pointer; }
+        
+        .chinese-hint { font-size: 1.6rem; font-weight: 700; margin: 10px 0; min-height: 2rem; color: #202124; }
+        
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        .shake { animation: shake 0.2s cubic-bezier(.36,.07,.19,.97) both; }
     </style>
 </head>
 <body>
 
 <div class="card" id="home-screen">
     <h1>單字拼圖挑戰</h1>
+    <p class="subtitle" id="file-status">請點擊下方讀取「單字庫.TXT」檔案</p>
     
-    <div id="status-container" class="status-box status-loading">
-        <div id="status-text">🔍 正在尋找單字庫...</div>
-        <div id="manual-area" class="hidden" style="margin-top:10px;">
-            <input type="file" id="file-input" accept=".txt" onchange="handleFile(this)" style="font-size: 0.8rem;">
-        </div>
+    <div class="file-upload-zone" onclick="document.getElementById('file-input').click()">
+        <strong>📁 點此讀取單字庫.TXT</strong>
+        <input type="file" id="file-input" accept=".txt" style="display:none" onchange="handleFileSelect(this)">
     </div>
 
     <div class="settings-group">
-        <div class="group-title">1. 選擇等級</div>
-        <select id="level-select" onchange="updateRange()">
-            <option value="">請先讀取單字庫</option>
-        </select>
-    </div>
-
-    <div class="settings-group">
-        <div class="group-title">2. 測驗範圍</div>
+        <div class="group-title">1. 設定測驗範圍 (題號)</div>
         <div class="range-inputs">
-            <input type="number" id="range-start" value="1">
-            <span>至</span>
+            <input type="number" id="range-start" value="1" min="1">
+            <span>到</span>
             <input type="number" id="range-end" value="10">
         </div>
-        <p id="level-info" style="font-size: 0.75rem; color: #70757a; margin-top: 8px;"></p>
     </div>
 
     <div class="settings-group">
-        <div class="group-title">3. 語音設定</div>
-        <select id="voice-select"><option value="">讀取語音引擎中...</option></select>
+        <div class="group-title">2. 語音發音設定</div>
+        <div class="setting-row">
+            <label>語速 (Rate)</label>
+            <input type="range" id="voice-rate" min="0.5" max="1.5" step="0.1" value="1">
+        </div>
+        <select id="voice-select"><option value="">載入聲音列表中...</option></select>
     </div>
 
-    <button class="btn-main" id="start-btn" onclick="startQuiz()" disabled>尚未準備就緒</button>
+    <button class="btn-main" id="start-btn" onclick="startQuiz()" disabled>請先載入單字庫</button>
 </div>
 
 <div class="card hidden" id="quiz-screen">
-    <div id="progress-text" style="font-size: 0.9rem; color: #70757a;">剩餘：--</div>
-    <button onclick="speakWord()" style="font-size: 3.5rem; background:none; border:none; cursor:pointer; padding: 5px;">🔊</button>
+    <div class="progress" id="progress-text">剩餘：--</div>
+    <button onclick="speakWord()" style="font-size: 3rem; background:none; border:none; cursor:pointer;">🔊</button>
     <div class="chinese-hint" id="chinese-display"></div>
     <div class="spell-display" id="current-spelling"></div>
     <div class="letter-grid" id="letter-buttons"></div>
-    <div style="display: flex; gap: 10px; margin-top: 25px;">
-        <button class="btn-outline" onclick="backspace()">退格</button>
-        <button class="btn-outline" onclick="clearSpelling()">清除</button>
+    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+        <button class="btn-outline" style="width:auto;" onclick="backspace()">退格</button>
+        <button class="btn-outline" style="width:auto;" onclick="clearSpelling()">清除</button>
     </div>
-    <div id="message-box" style="margin-top:10px; font-weight:bold; min-height:1.5rem;"></div>
+    <div id="message-box" style="margin-top:15px; font-weight:bold; min-height:1.2rem;"></div>
 </div>
 
 <div class="card hidden" id="result-screen">
     <h2>測驗完成！</h2>
-    <div id="stats-info" style="margin: 20px 0; font-size: 1.1rem; line-height: 1.8;"></div>
-    <button class="btn-main" onclick="location.reload()">回首頁</button>
+    <div id="stats-info" style="margin: 20px 0; line-height: 1.8;"></div>
+    <button class="btn-main" onclick="location.reload()">重新開始</button>
 </div>
 
 <script>
-    let wordBank = {}; 
+    let wordBank = [];
     let currentQuestions = [];
     let initialCount = 0;
-    let totalAttempts = 0;
     let userSpelling = "";
     let wrongCount = 0;
+    let totalAttempts = 0;
     let isQuizActive = false;
 
-    // --- 1. 核心載入邏輯 ---
-    async function init() {
-        initVoices();
-        
-        // 如果是本地開啟 (file://)，直接顯示手動上傳
-        if (window.location.protocol === 'file:') {
-            showManualMode("偵測到本地開啟：請選取「單字庫.TXT」");
-        } else {
-            // 如果是 GitHub Pages，嘗試自動讀取
-            try {
-                const res = await fetch(`單字庫.TXT?t=${Date.now()}`);
-                if (!res.ok) throw new Error();
-                const text = await res.text();
-                parseData(text);
-                setStatus("✅ 單字庫自動連線成功！", "status-ok");
-            } catch (e) {
-                showManualMode("⚠️ 無法自動連線單字庫，請手動選取");
-            }
-        }
+    // 語音系統
+    let synth = window.speechSynthesis;
+    let voices = [];
+    function populateVoiceList() {
+        voices = synth.getVoices().filter(v => v.lang.includes('en'));
+        const voiceSelect = document.getElementById('voice-select');
+        voiceSelect.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
     }
+    if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = populateVoiceList;
 
-    function showManualMode(msg) {
-        setStatus(msg, "status-manual");
-        document.getElementById('manual-area').classList.remove('hidden');
-    }
-
-    function setStatus(msg, className) {
-        const container = document.getElementById('status-container');
-        document.getElementById('status-text').textContent = msg;
-        container.className = `status-box ${className}`;
-    }
-
-    function handleFile(input) {
+    // 讀取外部檔案邏輯
+    function handleFileSelect(input) {
         const file = input.files[0];
         if (!file) return;
+        
         const reader = new FileReader();
-        reader.onload = (e) => {
-            parseData(e.target.result);
-            setStatus(`✅ 已手動讀取：${file.name}`, "status-ok");
+        reader.onload = function(e) {
+            const content = e.target.result;
+            parseTxtData(content);
         };
         reader.readAsText(file);
     }
 
-    function parseData(text) {
-        const lines = text.split(/\r?\n/);
-        wordBank = {};
-        
+    function parseTxtData(text) {
+        // 分行處理，並移除 等標記與多餘空白
+        const lines = text.split('\n');
+        wordBank = [];
+
         lines.forEach(line => {
-            let clean = line.replace(/\/gi, '').trim();
-            if (!clean || clean.startsWith('等級')) return;
-            
-            const [lvl, en, zh] = clean.split(',').map(s => s?.trim());
-            if (lvl && en && zh) {
-                if (!wordBank[lvl]) wordBank[lvl] = [];
-                wordBank[lvl].push({ en, zh });
+            // 移除標記內容如 
+            let cleanLine = line.replace(/\/gi, '').trim();
+            if (!cleanLine || cleanLine.startsWith('等級,')) return;
+
+            const parts = cleanLine.split(',');
+            if (parts.length >= 3) {
+                const en = parts[1].trim();
+                const zh = parts[2].trim();
+                wordBank.push({ en, zh });
             }
         });
 
-        const lvls = Object.keys(wordBank);
-        if (lvls.length > 0) {
-            const select = document.getElementById('level-select');
-            select.innerHTML = lvls.map(l => `<option value="${l}">${l}</option>`).join('');
-            updateRange();
+        if (wordBank.length > 0) {
+            document.getElementById('file-status').innerHTML = `✅ 已成功讀取 ${wordBank.length} 個單字`;
+            document.getElementById('range-end').value = wordBank.length;
             document.getElementById('start-btn').disabled = false;
             document.getElementById('start-btn').textContent = "開始測驗";
+        } else {
+            alert("檔案格式不符，請確認是否為單字庫.TXT");
         }
     }
-
-    function updateRange() {
-        const lvl = document.getElementById('level-select').value;
-        if (!wordBank[lvl]) return;
-        const count = wordBank[lvl].length;
-        document.getElementById('range-start').value = 1;
-        document.getElementById('range-end').value = count;
-        document.getElementById('level-info').textContent = `* 該等級共有 ${count} 個單字`;
-    }
-
-    // --- 2. 語音系統 ---
-    let synth = window.speechSynthesis;
-    let voices = [];
-    function initVoices() {
-        voices = synth.getVoices().filter(v => v.lang.includes('en'));
-        const select = document.getElementById('voice-select');
-        if (voices.length > 0) {
-            select.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
-        }
-    }
-    if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = initVoices;
 
     function speakWord() {
         if (!currentQuestions[0]) return;
         synth.cancel();
         const utter = new SpeechSynthesisUtterance(currentQuestions[0].en.replace(/\(.*\)/, ''));
-        const vIdx = document.getElementById('voice-select').value;
-        if (voices[vIdx]) utter.voice = voices[vIdx];
+        const voiceIndex = document.getElementById('voice-select').value;
+        if (voices[voiceIndex]) utter.voice = voices[voiceIndex];
         utter.rate = document.getElementById('voice-rate').value;
         synth.speak(utter);
     }
 
-    // --- 3. 遊戲邏輯 ---
     function startQuiz() {
-        const lvl = document.getElementById('level-select').value;
-        const start = Math.max(1, parseInt(document.getElementById('range-start').value)) - 1;
-        const end = Math.min(wordBank[lvl].length, parseInt(document.getElementById('range-end').value));
+        const start = parseInt(document.getElementById('range-start').value) - 1;
+        const end = parseInt(document.getElementById('range-end').value);
         
-        currentQuestions = wordBank[lvl].slice(start, end).sort(() => Math.random() - 0.5);
-        if (currentQuestions.length === 0) return alert("範圍錯誤");
-
+        currentQuestions = wordBank.slice(start, end).sort(() => Math.random() - 0.5);
         initialCount = currentQuestions.length;
         totalAttempts = 0;
         isQuizActive = true;
-        document.getElementById('home-screen').classList.add('hidden');
-        document.getElementById('quiz-screen').classList.remove('hidden');
+        showScreen('quiz-screen');
         showQuestion();
     }
 
     function showQuestion() {
-        if (currentQuestions.length === 0) return endQuiz();
-        userSpelling = ""; wrongCount = 0;
+        if (currentQuestions.length === 0) { endQuiz(); return; }
+        userSpelling = "";
+        wrongCount = 0;
         const data = currentQuestions[0];
-        document.getElementById('progress-text').textContent = `進度：${currentQuestions.length} / ${initialCount}`;
-        document.getElementById('chinese-display').textContent = data.zh;
-        document.getElementById('current-spelling').textContent = "";
         document.getElementById('message-box').textContent = "";
-        generateButtons(data.en.toLowerCase());
+        document.getElementById('current-spelling').textContent = "";
+        document.getElementById('chinese-display').textContent = data.zh;
+        document.getElementById('progress-text').textContent = `剩餘：${currentQuestions.length} / 範圍總數：${initialCount}`;
+        
+        generateLetters(data.en.toLowerCase());
         speakWord();
     }
 
-    function generateButtons(en) {
-        let target = en.replace(/[^a-z]/g, '');
-        let letters = target.split('');
-        while(letters.length < target.length + 4) letters.push("abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random()*26)]);
+    function generateLetters(en) {
+        let cleanWord = en.replace(/[^a-z]/g, ''); // 只拼英文字母部分
+        let letters = cleanWord.split('');
+        const alpha = "abcdefghijklmnopqrstuvwxyz";
+        while(letters.length < cleanWord.length + 3) {
+            letters.push(alpha[Math.floor(Math.random()*26)]);
+        }
         letters.sort(() => Math.random() - 0.5);
-        document.getElementById('letter-buttons').innerHTML = letters.map(c => 
-            `<button class="letter-btn" onclick="handleInput('${c}')">${c}</button>`
-        ).join('');
+        
+        const grid = document.getElementById('letter-buttons');
+        grid.innerHTML = letters.map(char => `<button class="letter-btn" onclick="handleInput('${char}')">${char}</button>`).join('');
     }
 
-    function handleInput(c) {
-        if (!isQuizActive) return;
-        userSpelling += c;
-        document.getElementById('current-spelling').textContent = userSpelling.toUpperCase();
+    function handleInput(char) {
+        userSpelling += char;
+        const display = document.getElementById('current-spelling');
+        display.textContent = userSpelling.toUpperCase();
         
         const target = currentQuestions[0].en.toLowerCase().replace(/[^a-z]/g, '');
-        if (userSpelling.length === target.length) {
-            totalAttempts++;
-            if (userSpelling === target) {
-                document.getElementById('message-box').textContent = "正確！🌟";
-                document.getElementById('message-box').style.color = "var(--success)";
-                currentQuestions.shift();
-                setTimeout(showQuestion, 800);
+        if (userSpelling.length === target.length) checkAnswer(target);
+    }
+
+    function checkAnswer(target) {
+        totalAttempts++;
+        if (userSpelling.toLowerCase() === target) {
+            document.getElementById('message-box').textContent = "正確！🌟";
+            document.getElementById('message-box').style.color = "var(--success)";
+            currentQuestions.shift();
+            setTimeout(showQuestion, 800);
+        } else {
+            wrongCount++;
+            const display = document.getElementById('current-spelling');
+            display.classList.add('shake');
+            setTimeout(() => display.classList.remove('shake'), 200);
+            
+            if (wrongCount >= 3) {
+                document.getElementById('message-box').textContent = `正解：${currentQuestions[0].en.toUpperCase()}`;
+                document.getElementById('message-box').style.color = "var(--error)";
+                const item = currentQuestions.shift();
+                currentQuestions.push(item);
+                setTimeout(showQuestion, 2000);
             } else {
-                wrongCount++;
-                const el = document.getElementById('current-spelling');
-                el.classList.add('shake');
-                setTimeout(() => el.classList.remove('shake'), 200);
-                if (wrongCount >= 3) {
-                    document.getElementById('message-box').textContent = `正解：${currentQuestions[0].en.toUpperCase()}`;
-                    document.getElementById('message-box').style.color = "var(--error)";
-                    currentQuestions.push(currentQuestions.shift());
-                    setTimeout(showQuestion, 2000);
-                } else {
-                    userSpelling = ""; el.textContent = "";
-                }
+                userSpelling = "";
+                display.textContent = "";
             }
         }
     }
 
     function backspace() { userSpelling = userSpelling.slice(0, -1); document.getElementById('current-spelling').textContent = userSpelling.toUpperCase(); }
     function clearSpelling() { userSpelling = ""; document.getElementById('current-spelling').textContent = ""; }
-    
+    function showScreen(id) { document.querySelectorAll('.card').forEach(c => c.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+
     function endQuiz() {
-        isQuizActive = false;
-        document.getElementById('quiz-screen').classList.add('hidden');
-        document.getElementById('result-screen').classList.remove('hidden');
-        const score = Math.round((initialCount/totalAttempts)*100);
-        document.getElementById('stats-info').innerHTML = `
-            測驗等級：${document.getElementById('level-select').value}<br>
-            挑戰題數：${initialCount} 題<br>
-            總點擊次數：${totalAttempts} 次<br>
-            <strong>綜合熟練度：${score}%</strong>
-        `;
+        showScreen('result-screen');
+        const score = Math.round((initialCount / totalAttempts) * 100);
+        document.getElementById('stats-info').innerHTML = `總題數：${initialCount}<br>總嘗試次數：${totalAttempts}<br>熟練度：${score}%`;
     }
 
-    window.onload = init;
     window.addEventListener('keydown', (e) => {
         if (!isQuizActive) return;
         if (e.key === 'Backspace') backspace();
+        if (e.key === 'Escape') clearSpelling();
         if (e.key.length === 1 && /[a-z]/i.test(e.key)) handleInput(e.key.toLowerCase());
     });
 </script>
-
 </body>
 </html>
