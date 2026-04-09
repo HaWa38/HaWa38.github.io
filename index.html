@@ -7,85 +7,99 @@
     <style>
         :root { --primary: #1a73e8; --success: #188038; --error: #d93025; --bg: #f8f9fa; }
         * { box-sizing: border-box; touch-action: manipulation; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; }
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background-color: var(--bg); 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; margin: 0; padding: 10px;
+        }
         
-        .card { background: white; padding: 1.5rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center; position: relative; }
+        .card { 
+            background: white; padding: 1.2rem; border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            width: 100%; max-width: 500px; /* 縮小寬度使其在垂直畫面更集中 */
+            text-align: center; position: relative;
+            max-height: 95vh; overflow-y: auto; /* 確保在小螢幕上卡片本身可滾動 */
+        }
         .hidden { display: none !important; }
-        h1 { color: var(--primary); margin: 0 0 1rem 0; font-size: 1.8rem; }
+        h1 { color: var(--primary); margin: 0 0 0.8rem 0; font-size: 1.5rem; }
         
-        /* 狀態列：僅顯示錯誤或讀取中 */
-        .status-banner { padding: 8px; border-radius: 10px; margin-bottom: 12px; font-size: 0.9rem; font-weight: bold; }
+        .status-banner { padding: 8px; border-radius: 10px; margin-bottom: 10px; font-size: 0.85rem; font-weight: bold; }
         .status-loading { background: #fff3cd; color: #856404; }
         .status-error { background: #f8d7da; color: #721c24; }
 
-        .settings-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; }
-        .settings-group { background: #f1f3f4; padding: 12px; border-radius: 12px; border: 1px solid #e0e0e0; text-align: left; }
-        .group-title { font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; color: #3c4043; }
-        select, input[type="number"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #dadce0; font-size: 1rem; }
+        .settings-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+        .settings-group { background: #f1f3f4; padding: 10px; border-radius: 12px; border: 1px solid #e0e0e0; text-align: left; }
+        .group-title { font-size: 0.8rem; font-weight: bold; margin-bottom: 4px; color: #3c4043; }
+        select, input[type="number"], input[type="range"] { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #dadce0; font-size: 0.95rem; }
         
-        /* 回歸單欄顯示：固定 4 列高度 (約 140px) */
+        /* 預覽區：極簡化列高 */
         .preview-box { 
-            height: 140px; overflow-y: auto; background: white; 
-            border: 1px solid #dadce0; border-radius: 8px; padding: 5px 10px;
-            display: block; /* 確保單欄顯示 */
+            height: 110px; overflow-y: auto; background: white; 
+            border: 1px solid #dadce0; border-radius: 8px; padding: 0 10px;
         }
         .preview-item { 
-            font-size: 1rem; color: #444; border-bottom: 1px dashed #eee; 
-            padding: 8px 0; /* 增加間距讓 4 列更精確 */
+            font-size: 0.9rem; color: #444; border-bottom: 1px solid #f0f0f0; 
+            padding: 4px 0; /* 減少列高 */
             text-align: left;
         }
 
-        /* 按鈕風格 */
-        .btn-row { display: flex; gap: 10px; margin-top: 10px; }
-        button { width: 100%; padding: 14px; border-radius: 12px; border: none; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        /* 語速控制列 */
+        .slider-container { display: flex; align-items: center; gap: 10px; }
+        .slider-val { font-size: 0.8rem; min-width: 30px; font-weight: bold; color: var(--primary); }
+
+        button { width: 100%; padding: 12px; border-radius: 12px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.1s; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:disabled { background: #e8eaed; color: #9aa0a6; }
         .btn-secondary { background: white; border: 2px solid #dadce0; color: #3c4043; }
-        .btn-danger { background: #fce8e6; color: #d93025; border: 1px solid #fad2cf; font-size: 0.9rem; margin-top: 10px; }
+        .btn-danger { background: #fce8e6; color: #d93025; font-size: 0.8rem; margin-top: 8px; padding: 8px; }
 
         /* 遊戲介面 */
         .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .nav-link { color: var(--primary); font-weight: bold; cursor: pointer; font-size: 1rem; border:none; background:none; width:auto; padding:5px; }
-        .chinese-hint { font-size: 2.2rem; font-weight: bold; margin: 15px 0; color: #202124; }
-        .spell-display { font-size: 2.5rem; letter-spacing: 2px; color: var(--primary); border-bottom: 3px solid var(--primary); display: inline-block; min-width: 200px; min-height: 3.2rem; margin-bottom: 20px; font-weight: bold; }
+        .nav-link { color: var(--primary); font-weight: bold; cursor: pointer; font-size: 0.9rem; border:none; background:none; width:auto; padding:5px; }
+        .chinese-hint { font-size: 1.8rem; font-weight: bold; margin: 10px 0; color: #202124; }
+        .spell-display { font-size: 2.2rem; letter-spacing: 2px; color: var(--primary); border-bottom: 3px solid var(--primary); display: inline-block; min-width: 150px; min-height: 2.8rem; margin-bottom: 15px; font-weight: bold; }
         
-        .letter-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-        .letter-btn { background: white; border: 2px solid #dadce0; padding: 15px 5px; border-radius: 10px; font-size: 1.5rem; font-weight: bold; box-shadow: 0 4px 0 #dadce0; }
+        .letter-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .letter-btn { background: white; border: 2px solid #dadce0; padding: 12px 2px; border-radius: 10px; font-size: 1.3rem; font-weight: bold; box-shadow: 0 3px 0 #dadce0; }
         .letter-btn:active { transform: translateY(2px); box-shadow: none; }
-        .space-btn { grid-column: span 2; background: #e8f0fe; color: var(--primary); }
+        .space-btn { grid-column: span 2; background: #e8f0fe; font-size: 1rem; }
 
-        #feedback { margin-top: 15px; font-weight: bold; height: 1.5rem; font-size: 1.1rem; }
+        #feedback { margin-top: 8px; font-weight: bold; height: 1.2rem; font-size: 1rem; }
     </style>
 </head>
 <body>
 
 <div class="card" id="setup-screen">
     <h1>字母拼圖挑戰</h1>
-    <div id="load-status" class="status-banner status-loading">正在讀取單字庫.TXT...</div>
+    <div id="load-status" class="status-banner status-loading">正在載入單字庫...</div>
 
     <div class="settings-grid">
         <div class="settings-group">
-            <div class="group-title">1. 選擇等級</div>
+            <div class="group-title">1. 等級選擇</div>
             <select id="level-select" onchange="updateRangeHint()"></select>
         </div>
         
-        <div class="settings-group" id="preview-container">
+        <div class="settings-group">
             <div class="group-title">單字預覽 (可滾動)</div>
             <div class="preview-box" id="word-preview-list"></div>
         </div>
 
         <div class="settings-group">
-            <div class="group-title">2. 測驗範圍</div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <input type="number" id="r-start" value="1">
+            <div class="group-title">2. 測驗範圍與語音調整</div>
+            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                <input type="number" id="r-start" value="1" style="width: 45%;">
                 <span>~</span>
-                <input type="number" id="r-end" value="10">
+                <input type="number" id="r-end" value="10" style="width: 45%;">
             </div>
-        </div>
-
-        <div class="settings-group">
-            <div class="group-title">3. 語音引擎選擇</div>
-            <select id="voice-select"></select>
+            
+            <div class="group-title">語音引擎</div>
+            <select id="voice-select" style="margin-bottom: 8px;"></select>
+            
+            <div class="group-title">語速：<span id="rate-val" class="slider-val">1.0</span></div>
+            <div class="slider-container">
+                <input type="range" id="voice-rate" min="0.5" max="2" step="0.1" value="1.0" oninput="updateRateLabel(this.value)">
+            </div>
         </div>
     </div>
 
@@ -95,17 +109,17 @@
 
 <div class="card hidden" id="game-screen">
     <div class="top-nav">
-        <button class="nav-link" onclick="returnToMain()">← 回主畫面</button>
-        <div id="quiz-progress" style="color: #70757a; font-size: 1rem; font-weight: bold;"></div>
+        <button class="nav-link" onclick="returnToMain()">← 返回</button>
+        <div id="quiz-progress" style="color: #70757a; font-size: 0.9rem; font-weight: bold;"></div>
     </div>
 
-    <button onclick="playVoice()" style="font-size: 3.5rem; background:none; border:none; cursor:pointer;">🔊</button>
+    <button onclick="playVoice()" style="font-size: 3rem; background:none; border:none; cursor:pointer;">🔊</button>
     <div class="chinese-hint" id="target-zh"></div>
     <div class="spell-display" id="user-input-display"></div>
     
     <div class="letter-grid" id="keyboard"></div>
     
-    <div class="btn-row">
+    <div style="display: flex; gap: 8px; margin-top: 15px;">
         <button class="btn-secondary" onclick="backspace()">退格</button>
         <button class="btn-secondary" onclick="clearInput()">清除</button>
     </div>
@@ -114,7 +128,7 @@
 
 <div class="card hidden" id="result-screen">
     <h2>測驗完成！</h2>
-    <div id="result-body" style="line-height: 2; margin: 25px 0; font-size: 1.2rem;"></div>
+    <div id="result-body" style="line-height: 1.8; margin: 20px 0; font-size: 1.1rem;"></div>
     <button class="btn-primary" onclick="location.reload()">回首頁</button>
 </div>
 
@@ -134,6 +148,10 @@
     }
     if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = initVoices;
 
+    function updateRateLabel(val) {
+        document.getElementById('rate-val').innerText = parseFloat(val).toFixed(1);
+    }
+
     async function autoFetchData() {
         const statusEl = document.getElementById('load-status');
         try {
@@ -141,11 +159,11 @@
             if (!response.ok) throw new Error();
             const text = await response.text();
             processData(text);
-            statusEl.classList.add('hidden'); // 成功後隱藏載入訊息
+            statusEl.classList.add('hidden');
             initVoices();
         } catch (err) {
             statusEl.className = "status-banner status-error";
-            statusEl.innerText = "⚠️ 無法讀取單字庫.TXT";
+            statusEl.innerText = "⚠️ 無法載入單字庫.TXT";
         }
     }
 
@@ -153,13 +171,14 @@
         wordData = {};
         const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
         lines.forEach(line => {
-            if (line.includes("等級")) return;
-            const parts = line.split(',');
-            if (parts.length >= 3) {
-                const lvl = parts[0].trim(), en = parts[1].trim(), zh = parts.slice(2).join(',').trim();
-                if (lvl && en) {
-                    if (!wordData[lvl]) wordData[lvl] = [];
-                    wordData[lvl].push({ en, zh });
+            if (line.startsWith("等級") || line.startsWith("LEVEL")) {
+                const parts = line.split(',');
+                if (parts.length >= 3) {
+                    const lvl = parts[0].trim(), en = parts[1].trim(), zh = parts.slice(2).join(',').trim();
+                    if (en && en !== "英文單字") {
+                        if (!wordData[lvl]) wordData[lvl] = [];
+                        wordData[lvl].push({ en, zh });
+                    }
                 }
             }
         });
@@ -173,21 +192,15 @@
 
     function updateRangeHint() {
         const lvl = document.getElementById('level-select').value;
-        if (!wordData[lvl]) return;
         const list = wordData[lvl];
         document.getElementById('r-start').value = 1;
         document.getElementById('r-end').value = list.length;
-        
-        // 單欄顯示 HTML
-        let html = "";
-        list.forEach((item, i) => {
-            html += `<div class="preview-item"><strong>${i+1}.</strong> ${item.en} - ${item.zh}</div>`;
-        });
-        document.getElementById('word-preview-list').innerHTML = html;
+        document.getElementById('word-preview-list').innerHTML = list.map((item, i) => 
+            `<div class="preview-item"><strong>${i+1}.</strong> ${item.en} - ${item.zh}</div>`).join('');
     }
 
     function exitProgram() { if(confirm("確定結束程式？")) location.href="about:blank"; }
-    function returnToMain() { if(confirm("確定返回主畫面？測驗進度將遺失。")) location.reload(); }
+    function returnToMain() { if(confirm("確定回主畫面？")) location.reload(); }
 
     function initGame() {
         const lvl = document.getElementById('level-select').value;
@@ -241,7 +254,7 @@
                     if (currentIdx >= quizList.length) showResult(); else loadQuestion();
                 }, 800);
             } else {
-                document.getElementById('feedback').innerText = "❌ Incorrect!";
+                document.getElementById('feedback').innerText = "❌ Try again!";
                 document.getElementById('feedback').style.color = "var(--error)";
                 currentInput = ""; document.getElementById('user-input-display').innerText = "";
             }
@@ -254,7 +267,9 @@
     function playVoice() {
         const utter = new SpeechSynthesisUtterance(quizList[currentIdx].en);
         const vIdx = document.getElementById('voice-select').value;
+        const rate = document.getElementById('voice-rate').value;
         if(voices[vIdx]) utter.voice = voices[vIdx];
+        utter.rate = parseFloat(rate);
         synth.speak(utter);
     }
 
@@ -262,7 +277,7 @@
         document.getElementById('game-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
         const acc = Math.round((quizList.length / totalAttempts) * 100);
-        document.getElementById('result-body').innerHTML = `等級：${document.getElementById('level-select').value}<br>準確度：${acc}%<br>總嘗試次數：${totalAttempts}`;
+        document.getElementById('result-body').innerHTML = `等級：${document.getElementById('level-select').value}<br>準確度：${acc}%<br>平均嘗試：${(totalAttempts/quizList.length).toFixed(1)} 次/題`;
     }
 
     window.onload = autoFetchData;
