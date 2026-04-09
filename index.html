@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>字母拼圖 - GitHub Pages 自動讀檔版</title>
+    <title>字母拼圖 - GitHub Pages 修復版</title>
     <style>
         :root { --primary: #1a73e8; --success: #188038; --error: #d93025; --bg: #f8f9fa; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: var(--bg); padding: 20px; box-sizing: border-box; }
@@ -20,6 +20,7 @@
         .range-inputs input[type="number"] { width: 60px; padding: 8px; border: 1px solid #dadce0; border-radius: 8px; text-align: center; }
         button { padding: 12px 24px; font-size: 1rem; cursor: pointer; border-radius: 12px; border: none; transition: 0.2s; font-weight: 600; width: 100%; }
         .btn-main { background: var(--primary); color: white; margin-bottom: 12px; }
+        .btn-main:disabled { background: #ccc; cursor: not-allowed; }
         .btn-outline { background: white; border: 2px solid #dadce0; color: #3c4043; margin-bottom: 12px; }
         .progress { font-size: 0.9rem; color: #70757a; margin-bottom: 1rem; }
         .spell-display { font-size: 2.2rem; border-bottom: 3px solid var(--primary); margin: 15px auto; min-height: 3.5rem; letter-spacing: 4px; color: var(--primary); font-weight: bold; display: flex; align-items: center; justify-content: center; }
@@ -34,7 +35,7 @@
 
 <div class="card" id="home-screen">
     <h1>單字拼圖挑戰</h1>
-    <p class="subtitle" id="file-status">正在嘗試連線單字庫...</p>
+    <p class="subtitle" id="file-status">正在載入資源...</p>
     
     <div class="settings-group">
         <div class="group-title">1. 設定測驗範圍 (題號)</div>
@@ -51,10 +52,11 @@
             <label>語速 (Rate)</label>
             <input type="range" id="voice-rate" min="0.5" max="1.5" step="0.1" value="1">
         </div>
-        <select id="voice-select"><option value="">讀取語音中...</option></select>
+        <select id="voice-select"><option value="">等待語音引擎中...</option></select>
+        <button class="btn-outline" style="font-size: 0.7rem; padding: 5px; margin-top: 8px; width: auto;" onclick="populateVoiceList()">🔄 重新整理聲音列表</button>
     </div>
 
-    <button class="btn-main" id="start-btn" onclick="startQuiz()" disabled>讀取單字庫中...</button>
+    <button class="btn-main" id="start-btn" onclick="startQuiz()" disabled>正在載入單字庫...</button>
 </div>
 
 <div class="card hidden" id="quiz-screen">
@@ -85,25 +87,57 @@
     let totalAttempts = 0;
     let isQuizActive = false;
 
-    // 1. 自動抓取同目錄下的 單字庫.TXT
+    // --- 語音系統修復 ---
+    let synth = window.speechSynthesis;
+    let voices = [];
+
+    function populateVoiceList() {
+        voices = synth.getVoices();
+        const voiceSelect = document.getElementById('voice-select');
+        
+        // 篩選英文語音
+        const enVoices = voices.filter(v => v.lang.includes('en'));
+        
+        if (enVoices.length > 0) {
+            voiceSelect.innerHTML = enVoices.map((v, i) => 
+                `<option value="${voices.indexOf(v)}">${v.name} (${v.lang})</option>`
+            ).join('');
+            document.getElementById('file-status').textContent = wordBank.length > 0 ? `✅ 準備就緒` : `✅ 語音已就緒，等待單字庫...`;
+        } else if (voices.length > 0) {
+            // 如果找不到英文，顯示所有語音
+            voiceSelect.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
+        }
+    }
+
+    // 修復 Chrome/Safari 不觸發 voiceschanged 的問題
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = populateVoiceList;
+    }
+    // 強制在頁面載入後執行一次
+    window.onload = () => {
+        populateVoiceList();
+        autoLoadFile();
+    };
+
+    // --- 檔案讀取優化 ---
     async function autoLoadFile() {
         const fileName = "單字庫.TXT";
         try {
-            const response = await fetch(fileName);
-            if (!response.ok) throw new Error("找不到檔案");
+            // 加入時間戳避免 GitHub Pages 快取舊版本
+            const response = await fetch(`${fileName}?t=${Date.now()}`);
+            if (!response.ok) throw new Error("File not found");
             const text = await response.text();
             parseTxtData(text);
         } catch (error) {
-            document.getElementById('file-status').innerHTML = "⚠️ 無法自動讀取「單字庫.TXT」<br><small>請確認檔案已上傳至 GitHub 且檔名正確</small>";
-            console.error(error);
+            document.getElementById('file-status').innerHTML = "⚠️ 找不到「單字庫.TXT」<br><small>請確認檔案已上傳至 GitHub 根目錄</small>";
         }
     }
 
     function parseTxtData(text) {
-        const lines = text.split('\n');
+        const lines = text.split(/\r?\n/);
         wordBank = [];
         lines.forEach(line => {
-            let cleanLine = line.replace(/\/gi, '').trim();
+            let cleanLine = line.trim();
             if (!cleanLine || cleanLine.startsWith('等級,')) return;
             const parts = cleanLine.split(',');
             if (parts.length >= 3) {
@@ -112,35 +146,28 @@
         });
 
         if (wordBank.length > 0) {
-            document.getElementById('file-status').textContent = `✅ 單字庫連線成功：共 ${wordBank.length} 個單字`;
             document.getElementById('range-end').value = wordBank.length;
             document.getElementById('start-btn').disabled = false;
             document.getElementById('start-btn').textContent = "開始測驗";
+            document.getElementById('file-status').textContent = `✅ 單字庫載入成功 (${wordBank.length} 個)`;
         }
     }
 
-    // 語音與遊戲邏輯
-    let synth = window.speechSynthesis;
-    let voices = [];
-    function populateVoiceList() {
-        voices = synth.getVoices().filter(v => v.lang.includes('en'));
-        document.getElementById('voice-select').innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
-    }
-    if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = populateVoiceList;
-
+    // --- 遊戲邏輯保持不變 ---
     function speakWord() {
         if (!currentQuestions[0]) return;
         synth.cancel();
         const utter = new SpeechSynthesisUtterance(currentQuestions[0].en.replace(/\(.*\)/, ''));
-        const voiceIndex = document.getElementById('voice-select').value;
-        if (voices[voiceIndex]) utter.voice = voices[voiceIndex];
+        const voiceSelect = document.getElementById('voice-select');
+        if (voices[voiceSelect.value]) utter.voice = voices[voiceSelect.value];
         utter.rate = document.getElementById('voice-rate').value;
         synth.speak(utter);
     }
 
     function startQuiz() {
-        const start = parseInt(document.getElementById('range-start').value) - 1;
-        const end = parseInt(document.getElementById('range-end').value);
+        const start = Math.max(0, parseInt(document.getElementById('range-start').value) - 1);
+        const end = Math.min(wordBank.length, parseInt(document.getElementById('range-end').value));
+        
         currentQuestions = wordBank.slice(start, end).sort(() => Math.random() - 0.5);
         initialCount = currentQuestions.length;
         totalAttempts = 0;
@@ -154,7 +181,7 @@
         if (currentQuestions.length === 0) {
             document.getElementById('quiz-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.remove('hidden');
-            document.getElementById('stats-info').innerHTML = `總題數：${initialCount}<br>嘗試次數：${totalAttempts}<br>熟練度：${Math.round((initialCount/totalAttempts)*100)}%`;
+            document.getElementById('stats-info').innerHTML = `範圍題數：${initialCount}<br>嘗試次數：${totalAttempts}<br>熟練度：${Math.round((initialCount/totalAttempts)*100)}%`;
             return;
         }
         userSpelling = ""; wrongCount = 0;
@@ -170,12 +197,14 @@
     function generateLetters(en) {
         let target = en.replace(/[^a-z]/g, '');
         let letters = target.split('');
-        while(letters.length < target.length + 3) letters.push("abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random()*26)]);
+        const alpha = "abcdefghijklmnopqrstuvwxyz";
+        while(letters.length < target.length + 3) letters.push(alpha[Math.floor(Math.random()*26)]);
         letters.sort(() => Math.random() - 0.5);
         document.getElementById('letter-buttons').innerHTML = letters.map(c => `<button class="letter-btn" onclick="handleInput('${c}')">${c}</button>`).join('');
     }
 
     function handleInput(c) {
+        if (!isQuizActive) return;
         userSpelling += c;
         document.getElementById('current-spelling').textContent = userSpelling.toUpperCase();
         const target = currentQuestions[0].en.toLowerCase().replace(/[^a-z]/g, '');
@@ -183,6 +212,7 @@
             totalAttempts++;
             if (userSpelling === target) {
                 document.getElementById('message-box').textContent = "正確！🌟";
+                document.getElementById('message-box').style.color = "var(--success)";
                 currentQuestions.shift();
                 setTimeout(showQuestion, 800);
             } else {
@@ -191,6 +221,7 @@
                 setTimeout(() => document.getElementById('current-spelling').classList.remove('shake'), 200);
                 if (wrongCount >= 3) {
                     document.getElementById('message-box').textContent = `正解：${currentQuestions[0].en.toUpperCase()}`;
+                    document.getElementById('message-box').style.color = "var(--error)";
                     currentQuestions.push(currentQuestions.shift());
                     setTimeout(showQuestion, 2000);
                 } else {
@@ -202,9 +233,6 @@
 
     function backspace() { userSpelling = userSpelling.slice(0,-1); document.getElementById('current-spelling').textContent = userSpelling.toUpperCase(); }
     function clearSpelling() { userSpelling = ""; document.getElementById('current-spelling').textContent = ""; }
-    
-    // 初始化執行自動讀檔
-    autoLoadFile();
 
     window.addEventListener('keydown', (e) => {
         if (!isQuizActive) return;
