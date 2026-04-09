@@ -11,58 +11,54 @@
         
         .card { background: white; padding: 1.5rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 700px; text-align: center; position: relative; }
         .hidden { display: none !important; }
-        h1 { color: var(--primary); margin: 0 0 1rem 0; font-size: 1.5rem; }
+        h1 { color: var(--primary); margin: 0 0 1rem 0; font-size: 1.8rem; }
         
-        /* 狀態列 */
-        .status-banner { padding: 8px; border-radius: 10px; margin-bottom: 12px; font-size: 0.85rem; font-weight: bold; }
+        /* 隱藏載入成功訊息，僅保留讀取中或錯誤提示 */
+        .status-banner { padding: 8px; border-radius: 10px; margin-bottom: 12px; font-size: 0.9rem; font-weight: bold; }
         .status-loading { background: #fff3cd; color: #856404; }
-        .status-success { background: #d4edda; color: #155724; }
         .status-error { background: #f8d7da; color: #721c24; }
 
-        /* 設定區塊佈局優化 */
-        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-        .settings-group { background: #f1f3f4; padding: 10px; border-radius: 12px; border: 1px solid #e0e0e0; text-align: left; }
-        .group-title { font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; color: #3c4043; }
-        select, input[type="number"] { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #dadce0; font-size: 0.9rem; }
+        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        .settings-group { background: #f1f3f4; padding: 12px; border-radius: 12px; border: 1px solid #e0e0e0; text-align: left; }
+        .group-title { font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; color: #3c4043; }
+        select, input[type="number"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #dadce0; font-size: 1rem; }
         
-        /* 多欄預覽清單 */
+        /* 固定 2 欄預覽清單 */
         .preview-container { grid-column: span 2; }
         .preview-box { 
-            height: 120px; overflow-y: auto; background: white; 
-            border: 1px solid #dadce0; border-radius: 8px; padding: 8px;
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;
+            height: 140px; overflow-y: auto; background: white; 
+            border: 1px solid #dadce0; border-radius: 8px; padding: 10px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
         }
-        @media (max-width: 600px) { .preview-box { grid-template-columns: repeat(2, 1fr); } .settings-grid { grid-template-columns: 1fr; } .preview-container { grid-column: span 1; } }
-        
-        .preview-item { font-size: 0.75rem; color: #5f6368; border-bottom: 1px dashed #eee; padding: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .preview-item { font-size: 0.95rem; color: #444; border-bottom: 1px dashed #eee; padding: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* 按鈕風格 */
         .btn-row { display: flex; gap: 10px; margin-top: 10px; }
-        button { width: 100%; padding: 12px; border-radius: 12px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        button { width: 100%; padding: 14px; border-radius: 12px; border: none; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:disabled { background: #e8eaed; color: #9aa0a6; }
         .btn-secondary { background: white; border: 2px solid #dadce0; color: #3c4043; }
-        .btn-danger { background: #fce8e6; color: #d93025; border: 1px solid #fad2cf; }
+        .btn-danger { background: #fce8e6; color: #d93025; border: 1px solid #fad2cf; font-size: 0.9rem; }
 
         /* 遊戲介面 */
         .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .nav-link { color: var(--primary); font-weight: bold; cursor: pointer; font-size: 0.9rem; border:none; background:none; width:auto; padding:0; }
-        .chinese-hint { font-size: 1.8rem; font-weight: bold; margin: 10px 0; color: #202124; }
-        .spell-display { font-size: 2rem; letter-spacing: 2px; color: var(--primary); border-bottom: 3px solid var(--primary); display: inline-block; min-width: 180px; min-height: 2.8rem; margin-bottom: 15px; font-weight: bold; }
+        .nav-link { color: var(--primary); font-weight: bold; cursor: pointer; font-size: 1rem; border:none; background:none; width:auto; padding:5px; }
+        .chinese-hint { font-size: 2.2rem; font-weight: bold; margin: 15px 0; color: #202124; }
+        .spell-display { font-size: 2.5rem; letter-spacing: 2px; color: var(--primary); border-bottom: 3px solid var(--primary); display: inline-block; min-width: 200px; min-height: 3.2rem; margin-bottom: 20px; font-weight: bold; }
         
-        .letter-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-        .letter-btn { background: white; border: 2px solid #dadce0; padding: 12px 2px; border-radius: 10px; font-size: 1.2rem; font-weight: bold; box-shadow: 0 3px 0 #dadce0; }
+        .letter-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        .letter-btn { background: white; border: 2px solid #dadce0; padding: 15px 5px; border-radius: 10px; font-size: 1.5rem; font-weight: bold; box-shadow: 0 4px 0 #dadce0; }
         .letter-btn:active { transform: translateY(2px); box-shadow: none; }
-        .space-btn { grid-column: span 2; background: #e8f0fe; }
+        .space-btn { grid-column: span 2; background: #e8f0fe; color: var(--primary); }
 
-        #feedback { margin-top: 10px; font-weight: bold; height: 1.2rem; font-size: 0.9rem; }
+        #feedback { margin-top: 15px; font-weight: bold; height: 1.5rem; font-size: 1.1rem; }
     </style>
 </head>
 <body>
 
 <div class="card" id="setup-screen">
     <h1>字母拼圖挑戰</h1>
-    <div id="load-status" class="status-banner status-loading">讀取中...</div>
+    <div id="load-status" class="status-banner status-loading">正在搜尋單字庫.TXT...</div>
 
     <div class="settings-grid">
         <div class="settings-group">
@@ -72,35 +68,35 @@
         
         <div class="settings-group">
             <div class="group-title">2. 測驗範圍</div>
-            <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
                 <input type="number" id="r-start" value="1">
-                <span style="font-size:0.8rem">至</span>
+                <span>~</span>
                 <input type="number" id="r-end" value="10">
             </div>
         </div>
 
         <div class="settings-group" style="grid-column: span 2;">
-            <div class="group-title">3. 語音引擎調整</div>
+            <div class="group-title">3. 語音引擎選擇</div>
             <select id="voice-select"></select>
         </div>
 
         <div class="settings-group preview-container hidden" id="preview-container">
-            <div class="group-title">單字預覽 (多欄顯示)</div>
+            <div class="group-title">單字預覽 (雙欄)</div>
             <div class="preview-box" id="word-preview-list"></div>
         </div>
     </div>
 
     <button class="btn-primary" id="start-btn" disabled onclick="initGame()">開始挑戰</button>
-    <button class="btn-danger" style="margin-top:8px; padding:8px;" onclick="exitProgram()">結束程式</button>
+    <button class="btn-danger" style="margin-top:12px; padding:10px;" onclick="exitProgram()">結束程式</button>
 </div>
 
 <div class="card hidden" id="game-screen">
     <div class="top-nav">
-        <button class="nav-link" onclick="returnToMain()">← 返回</button>
-        <div id="quiz-progress" style="color: #70757a; font-size: 0.8rem; font-weight: bold;"></div>
+        <button class="nav-link" onclick="returnToMain()">← 回主畫面</button>
+        <div id="quiz-progress" style="color: #70757a; font-size: 1rem; font-weight: bold;"></div>
     </div>
 
-    <button onclick="playVoice()" style="font-size: 2.5rem; background:none; border:none; cursor:pointer;">🔊</button>
+    <button onclick="playVoice()" style="font-size: 3.5rem; background:none; border:none; cursor:pointer;">🔊</button>
     <div class="chinese-hint" id="target-zh"></div>
     <div class="spell-display" id="user-input-display"></div>
     
@@ -115,7 +111,7 @@
 
 <div class="card hidden" id="result-screen">
     <h2>測驗完成！</h2>
-    <div id="result-body" style="line-height: 2; margin: 20px 0;"></div>
+    <div id="result-body" style="line-height: 2; margin: 25px 0; font-size: 1.2rem;"></div>
     <button class="btn-primary" onclick="location.reload()">回首頁</button>
 </div>
 
@@ -128,7 +124,6 @@
     let synth = window.speechSynthesis;
     let voices = [];
 
-    // 初始化語音
     function initVoices() {
         voices = synth.getVoices().filter(v => v.lang.includes('en'));
         const select = document.getElementById('voice-select');
@@ -140,14 +135,15 @@
         const statusEl = document.getElementById('load-status');
         try {
             const response = await fetch('單字庫.TXT', { cache: "no-store" });
+            if (!response.ok) throw new Error();
             const text = await response.text();
             processData(text);
-            statusEl.className = "status-banner status-success";
-            statusEl.innerText = "✅ 單字庫載入成功";
+            // 成功後隱藏狀態列
+            statusEl.classList.add('hidden');
             initVoices();
         } catch (err) {
             statusEl.className = "status-banner status-error";
-            statusEl.innerText = "⚠️ 找不到單字庫.TXT";
+            statusEl.innerText = "⚠️ 找不到單字庫.TXT，請確認檔案位置。";
         }
     }
 
@@ -182,8 +178,8 @@
         document.getElementById('preview-container').classList.remove('hidden');
     }
 
-    function exitProgram() { if(confirm("確定結束？")) location.href="about:blank"; }
-    function returnToMain() { if(confirm("放棄目前進度回主畫面？")) location.reload(); }
+    function exitProgram() { if(confirm("確定結束程式？")) location.href="about:blank"; }
+    function returnToMain() { if(confirm("確定返回主畫面？目前的測驗進度將遺失。")) location.reload(); }
 
     function initGame() {
         const lvl = document.getElementById('level-select').value;
@@ -258,7 +254,7 @@
         document.getElementById('game-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
         const acc = Math.round((quizList.length / totalAttempts) * 100);
-        document.getElementById('result-body').innerHTML = `等級：${document.getElementById('level-select').value}<br>準確度：${acc}%<br>總嘗試：${totalAttempts}`;
+        document.getElementById('result-body').innerHTML = `完成等級：${document.getElementById('level-select').value}<br>準確度：${acc}%<br>總嘗試次數：${totalAttempts}`;
     }
 
     window.onload = autoFetchData;
