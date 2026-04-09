@@ -108,7 +108,7 @@
     let attemptsLeft = 3, totalAttempts = 0, correctAnswers = 0, initialQuizCount = 0;
     let synth = window.speechSynthesis, voices = [];
     let audioCtx; 
-    let isLetterSoundEnabled = true; // 控制按鈕發音的開關
+    let isLetterSoundEnabled = true;
 
     function initVoices() {
         voices = synth.getVoices().filter(v => v.lang.includes('en'));
@@ -116,17 +116,11 @@
     }
     if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = initVoices;
 
-    // 切換按鈕發音開關
     function toggleLetterSound() {
         isLetterSoundEnabled = !isLetterSoundEnabled;
         const btn = document.getElementById('letter-sound-toggle');
-        if (isLetterSoundEnabled) {
-            btn.innerText = "字母發音: 開";
-            btn.classList.remove('off');
-        } else {
-            btn.innerText = "字母發音: 關";
-            btn.classList.add('off');
-        }
+        btn.innerText = `字母發音: ${isLetterSoundEnabled ? '開' : '關'}`;
+        btn.classList.toggle('off', !isLetterSoundEnabled);
     }
 
     function playSound(type) {
@@ -152,7 +146,7 @@
     }
 
     function speakLetter(char) {
-        if (!isLetterSoundEnabled) return; // 如果關閉則不執行
+        if (!isLetterSoundEnabled) return;
         synth.cancel(); 
         const utter = new SpeechSynthesisUtterance(char === ' ' ? 'space' : char);
         const vIdx = document.getElementById('voice-select').value;
@@ -211,7 +205,7 @@
         const mode = document.getElementById('quiz-mode').value;
         let start = parseInt(document.getElementById('r-start').value) - 1;
         let end = parseInt(document.getElementById('r-end').value);
-        if (isNaN(start) || isNaN(end) || start < 0 || end > wordData[lvl].length || start >= end) return alert("範圍錯誤");
+        if (isNaN(start) || isNaN(end) || start < 0 || end > wordData[lvl].length || start >= end) return alert("範圍範圍錯誤");
 
         let baseList = wordData[lvl].slice(start, end).sort(() => Math.random() - 0.5);
         quizList = (mode === "random10") ? baseList.slice(0, 10) : baseList;
@@ -287,27 +281,41 @@
             document.getElementById('user-input-display').innerText = targetWord;
             
             quizList.push(quizList[currentIdx]); 
+            
+            // 進入強化教學模式
             teachWord(targetWord);
-            setTimeout(() => { currentIdx++; loadQuestion(); }, 4000);
         }
     }
 
     function teachWord(word) {
         synth.cancel();
         const vIdx = document.getElementById('voice-select').value;
-        const rate = parseFloat(document.getElementById('voice-rate').value);
+        const mainRate = parseFloat(document.getElementById('voice-rate').value);
 
-        for(let char of word) {
+        // 1. 逐字母拼讀 (速度加快到 1.8)
+        for(let i = 0; i < word.length; i++) {
+            const char = word[i];
             const letterUtter = new SpeechSynthesisUtterance(char === ' ' ? 'space' : char);
             if(voices[vIdx]) letterUtter.voice = voices[vIdx];
-            letterUtter.rate = 1.1;
+            letterUtter.rate = 1.8; // 加快拼音速度
             synth.speak(letterUtter);
         }
 
+        // 2. 整詞朗讀 (稍微提高音調並接在拼音後)
         const wordUtter = new SpeechSynthesisUtterance(word);
         if(voices[vIdx]) wordUtter.voice = voices[vIdx];
-        wordUtter.rate = rate;
+        wordUtter.rate = mainRate;
         wordUtter.pitch = 1.1;
+        
+        // 3. 讀完單字後，「停一下」再出下一題
+        wordUtter.onend = () => {
+            setTimeout(() => {
+                currentIdx++;
+                if (currentIdx >= quizList.length) showResult();
+                else loadQuestion();
+            }, 1500); // 停頓 1.5 秒
+        };
+        
         synth.speak(wordUtter);
     }
 
