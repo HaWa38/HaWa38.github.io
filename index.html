@@ -148,7 +148,6 @@
     }
     if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = initVoices;
 
-    // 處理測驗模式按鈕切換
     function setMode(mode) {
         document.getElementById('quiz-mode').value = mode;
         document.getElementById('btn-mode-all').classList.toggle('active', mode === 'all');
@@ -268,11 +267,9 @@
         currentInput = ""; attemptsLeft = 3;
         updateUI();
         
-        // 抓取單字中的所有字元（保留原始大小寫與符號）
         let rawChars = q.en.replace(/\s/g, '').split('');
         let letters = Array.from(new Set(rawChars));
         
-        // 生成干擾字：優先選用小寫字母
         let lowerUsedSet = new Set(letters.map(c => c.toLowerCase()));
         const lowerAlpha = "abcdefghijklmnopqrstuvwxyz";
         let shuffledLower = lowerAlpha.split('').sort(() => Math.random() - 0.5);
@@ -287,7 +284,10 @@
         
         letters.sort(() => Math.random() - 0.5);
 
-        let kbHTML = letters.map(c => `<button class="letter-btn" onclick="pressKey('${c}')">${c}</button>`).join('');
+        /* 【修正重點】: 將 onclick 的參數改為 this.textContent
+           這樣就算包含單引號 (') 或雙引號 (")，也不會破壞 HTML 或 JS 的語法！
+        */
+        let kbHTML = letters.map(c => `<button class="letter-btn" onclick="pressKey(this.textContent)">${c}</button>`).join('');
         if (q.en.includes(" ")) kbHTML += `<button class="letter-btn space-btn" onclick="pressKey(' ')">Space</button>`;
         document.getElementById('keyboard').innerHTML = kbHTML;
         setTimeout(() => playVoice(), 300);
