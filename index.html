@@ -13,10 +13,15 @@
         .hidden { display: none !important; }
         h1 { color: var(--primary); margin: 0 0 1rem 0; font-size: 1.5rem; }
         
-        .settings-group { background: #f1f3f4; padding: 10px; border-radius: 12px; border: 1px solid #e0e0e0; text-align: left; margin-bottom: 10px; }
-        .group-title { font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; color: #3c4043; }
+        /* 設定區域樣式 */
+        .settings-group { background: #f1f3f4; padding: 12px; border-radius: 12px; border: 1px solid #e0e0e0; text-align: left; margin-bottom: 12px; }
+        .group-title { font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; color: #3c4043; }
         select, input[type="number"], input[type="range"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #dadce0; font-size: 1rem; margin-bottom: 5px; }
         
+        /* 模式選擇按鈕樣式 */
+        .btn-mode { flex: 1; background: white; border: 2px solid #dadce0; color: #3c4043; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-mode.active { border-color: var(--primary); background: #e8f0fe; color: var(--primary); }
+
         /* 遊戲頂部工具欄 (三欄佈局) */
         .game-header { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; width: 100%; margin-bottom: 15px; }
 
@@ -33,7 +38,7 @@
         
         button { cursor: pointer; transition: 0.2s; }
         .btn-primary { background: var(--primary); color: white; width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: bold; font-size: 1rem; margin-top: 5px; }
-        .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); width: 100%; padding: 12px; border-radius: 12px; font-weight: bold; margin-bottom: 5px; }
+        .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); width: 100%; padding: 10px; border-radius: 10px; font-weight: bold; }
         .btn-secondary { background: white; border: 2px solid #dadce0; color: #3c4043; padding: 8px 12px; border-radius: 10px; font-size: 0.9rem; font-weight: bold; }
         .btn-danger { background: #fce8e6; color: #d93025; font-size: 0.85rem; margin-top: 10px; padding: 8px; border: none; width: 100%; border-radius: 12px; }
         .btn-toggle { font-size: 0.8rem; padding: 5px 10px; border: 1px solid var(--primary); color: var(--primary); background: #e8f0fe; border-radius: 8px; font-weight: bold; white-space: nowrap; }
@@ -50,30 +55,41 @@
 
 <div class="card" id="setup-screen">
     <h1>字母拼圖挑戰</h1>
+    
     <div class="settings-group">
-        <div class="group-title">1. 單字庫設定</div>
-        <select id="level-select" onchange="onLevelChange()"></select>
-        <button class="btn-outline" onclick="toggleModal(true)">🔍 查看字庫預覽</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div class="group-title" style="margin: 0;">1. 單字庫設定</div>
+            <button class="btn-outline" style="width: auto; padding: 4px 10px; font-size: 0.8rem; margin: 0;" onclick="toggleModal(true)">🔍 預覽</button>
+        </div>
+        <select id="level-select" onchange="onLevelChange()" style="margin: 0;"></select>
     </div>
+
     <div class="settings-group">
         <div class="group-title">2. 測驗範圍與模式</div>
-        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 5px;">
-            <input type="number" id="r-start" style="width: 80px;">
+        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;">
+            <input type="number" id="r-start" style="width: 80px; margin: 0;">
             <span>~</span>
-            <input type="number" id="r-end" style="width: 80px;">
+            <input type="number" id="r-end" style="width: 80px; margin: 0;">
         </div>
-        <select id="quiz-mode">
-            <option value="all">範圍全測 (錯題循環)</option>
-            <option value="random10">隨機 10 題 (錯題循環)</option>
-        </select>
+        <div style="display: flex; gap: 10px;">
+            <button id="btn-mode-all" class="btn-mode active" onclick="setMode('all')">全部測試</button>
+            <button id="btn-mode-random" class="btn-mode" onclick="setMode('random10')">隨機 10 題</button>
+        </div>
+        <input type="hidden" id="quiz-mode" value="all">
     </div>
+
     <div class="settings-group">
         <div class="group-title">3. 語音測試與設定</div>
-        <select id="voice-select"></select>
-        <input type="range" id="voice-rate" min="0.5" max="2.0" step="0.1" value="1.0" oninput="document.getElementById('rate-val').innerText=parseFloat(this.value).toFixed(1)">
-        <div style="text-align:right; font-size:0.8rem; margin-bottom:10px;">語速: <span id="rate-val" style="color:var(--primary)">1.0</span></div>
-        <button class="btn-outline" onclick="testVoice()">🎵 測試語音效果</button>
+        <select id="voice-select" style="margin-bottom: 10px;"></select>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="flex: 1;">
+                <input type="range" id="voice-rate" min="0.5" max="2.0" step="0.1" value="1.0" oninput="document.getElementById('rate-val').innerText=parseFloat(this.value).toFixed(1)" style="margin: 0;">
+                <div style="font-size:0.8rem; margin-top: 2px;">語速: <span id="rate-val" style="color:var(--primary); font-weight: bold;">1.0</span></div>
+            </div>
+            <button class="btn-outline" style="margin: 0; width: auto; padding: 10px 15px;" onclick="testVoice()">🎵 測試</button>
+        </div>
     </div>
+
     <button class="btn-primary" id="start-btn" disabled onclick="initGame()">開始挑戰</button>
     <button class="btn-danger" onclick="exitProgram()">結束程式</button>
 </div>
@@ -131,6 +147,13 @@
         document.getElementById('voice-select').innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
     }
     if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = initVoices;
+
+    // 處理測驗模式按鈕切換
+    function setMode(mode) {
+        document.getElementById('quiz-mode').value = mode;
+        document.getElementById('btn-mode-all').classList.toggle('active', mode === 'all');
+        document.getElementById('btn-mode-random').classList.toggle('active', mode === 'random10');
+    }
 
     function testVoice() {
         synth.cancel();
@@ -249,11 +272,9 @@
         let rawChars = q.en.replace(/\s/g, '').split('');
         let letters = Array.from(new Set(rawChars));
         
-        // 生成干擾字：【修正】優先選用小寫字母
+        // 生成干擾字：優先選用小寫字母
         let lowerUsedSet = new Set(letters.map(c => c.toLowerCase()));
         const lowerAlpha = "abcdefghijklmnopqrstuvwxyz";
-        
-        // 將 a-z 打亂順序，從中挑選沒被用過的字母填滿至 10 個按鈕
         let shuffledLower = lowerAlpha.split('').sort(() => Math.random() - 0.5);
         
         for (let char of shuffledLower) {
