@@ -60,6 +60,8 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; width: 90%; border-radius: 25px; padding: 1.5rem; max-height: 80vh; display: flex; flex-direction: column; border: 4px solid var(--primary); }
         .preview-list { overflow-y: auto; flex-grow: 1; border: 2px solid #eee; padding: 10px; background: #fafafa; border-radius: 10px;}
+        
+        .toggle-box { background: white; border: 2px solid #FFCC80; border-radius: 10px; padding: 10px; display: flex; align-items: center; gap: 10px; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -104,6 +106,10 @@
         <div style="display: flex; align-items: center; gap: 15px;">
             <input type="range" id="voice-rate" min="0.5" max="2.0" step="0.1" value="1.0" style="flex:1;">
             <button class="btn-outline" style="width:auto; padding: 8px 12px;" onclick="testVoice()">🎵 測試</button>
+        </div>
+        <div class="toggle-box">
+            <input type="checkbox" id="letter-sound-toggle" checked style="width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer;">
+            <label for="letter-sound-toggle" style="font-weight:bold; color:#795548; cursor:pointer; width:100%;">🔤 開啟按鍵發音 (打字機模式)</label>
         </div>
     </div>
     <button class="btn-primary" id="start-btn" disabled onclick="initGame()">🚀 開始遊戲！</button>
@@ -249,7 +255,23 @@
         document.getElementById('feedback').innerText = "";
     }
 
+    // 【新增】唸出單一字母的函數
+    function speakLetter(char) {
+        synth.cancel(); // 停止先前的聲音，讓字母即時發出
+        let textToSpeak = (char === ' ') ? 'space' : char;
+        const utter = new SpeechSynthesisUtterance(textToSpeak);
+        const vIdx = document.getElementById('voice-select').value;
+        if(voices[vIdx]) utter.voice = voices[vIdx];
+        utter.rate = parseFloat(document.getElementById('voice-rate').value) * 1.2; // 字母唸快一點點會比較順
+        synth.speak(utter);
+    }
+
     function pressKey(char) {
+        // 【新增】檢查開關是否開啟，若開啟則發出字母音
+        if (document.getElementById('letter-sound-toggle').checked) {
+            speakLetter(char);
+        }
+
         const target = quizList[currentIdx].en;
         currentInput += char;
         document.getElementById('user-input-display').innerText = currentInput.replace(/ /g, "_");
@@ -280,7 +302,7 @@
     function handleIncorrect() {
         attemptsLeft--;
         
-        // 【新增邏輯】答錯扣 3 分，最低 0 分
+        // 答錯扣 3 分，最低 0 分
         score = Math.max(0, score - 3);
         
         playSound('incorrect');
@@ -292,7 +314,7 @@
         
         if (attemptsLeft > 0) {
             currentInput = "";
-            updateUI(); // 這裡會把扣分後的 score 更新到畫面上
+            updateUI(); 
             document.getElementById('feedback').innerText = "❌ 差一點點 (扣3分)，再試試！";
             document.getElementById('feedback').style.color = "var(--error)";
         } else {
@@ -354,7 +376,8 @@
     function playVoice() {
         synth.cancel();
         const utter = new SpeechSynthesisUtterance(quizList[currentIdx].en);
-        utter.voice = voices[document.getElementById('voice-select').value];
+        const vIdx = document.getElementById('voice-select').value;
+        if(voices[vIdx]) utter.voice = voices[vIdx];
         utter.rate = parseFloat(document.getElementById('voice-rate').value);
         synth.speak(utter);
     }
