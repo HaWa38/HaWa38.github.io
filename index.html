@@ -29,48 +29,45 @@
         .btn-mode.active { border-color: var(--primary); background: var(--primary); color: white; transform: scale(1.05); box-shadow: 0 5px 15px rgba(255, 112, 67, 0.3); }
 
         .game-header { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; width: 100%; margin-bottom: 10px; }
-        
         .info-board { display: flex; justify-content: space-between; align-items: center; background: #f5f5f5; padding: 10px 15px; border-radius: 20px; margin-bottom: 15px; border: 2px solid #eee; }
         .score-display { font-size: 1.2rem; font-weight: bold; color: #FBC02D; text-shadow: 1px 1px 0px #FFF; }
         .hearts-display { font-size: 1.2rem; letter-spacing: 2px; }
 
         .chinese-hint { font-size: 2rem; font-weight: bold; margin: 10px 0; color: var(--secondary); text-shadow: 1px 1px 0px #bbdefb; }
-        .spell-display { font-size: 2.5rem; letter-spacing: 4px; color: var(--text); border-bottom: 4px dashed var(--primary); display: inline-block; min-width: 200px; min-height: 3.2rem; margin-bottom: 15px; white-space: pre; }
+        .spell-display { font-size: 2.5rem; letter-spacing: 4px; color: var(--text); border-bottom: 4px dashed var(--primary); display: inline-block; min-width: 200px; min-height: 3.2rem; margin-bottom: 15px; white-space: pre; font-family: 'Consolas', monospace; }
         
         .letter-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
         .letter-btn { background: white; border: 3px solid var(--secondary); color: var(--secondary); padding: 12px 2px; border-radius: 15px; font-size: 1.6rem; font-weight: bold; box-shadow: 0 6px 0 var(--secondary); transition: 0.1s; cursor: pointer; }
         .letter-btn:active { transform: translateY(6px); box-shadow: 0 0 0 var(--secondary); }
         
-        .btn-primary { background: var(--success); color: white; width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: bold; font-size: 1.2rem; margin-top: 5px; box-shadow: 0 6px 0 #388E3C; }
-        .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); width: 100%; padding: 10px; border-radius: 10px; font-weight: bold; }
-        .btn-secondary { background: white; border: 2px solid #B0BEC5; color: #546E7A; padding: 10px; border-radius: 12px; font-size: 1rem; font-weight: bold; box-shadow: 0 4px 0 #B0BEC5; }
+        .btn-primary { background: var(--success); color: white; width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: bold; font-size: 1.2rem; margin-top: 5px; box-shadow: 0 6px 0 #388E3C; cursor: pointer; }
+        .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); width: 100%; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .btn-secondary { background: white; border: 2px solid #B0BEC5; color: #546E7A; padding: 10px; border-radius: 12px; font-size: 1rem; font-weight: bold; box-shadow: 0 4px 0 #B0BEC5; cursor: pointer; }
 
-        /* 醒目解答看板樣式 */
-        .answer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; color: white; animation: fadeIn 0.3s ease-out; }
-        .answer-title { font-size: 1.5rem; color: #FFCC80; margin-bottom: 20px; }
-        .answer-text { font-size: 4.5rem; font-weight: bold; color: #FFEB3B; text-shadow: 0 0 20px rgba(255,235,59,0.5); letter-spacing: 5px; font-family: 'Consolas', monospace; }
-        .answer-zh { font-size: 2rem; margin-top: 10px; color: white; }
+        /* 醒目答案遮罩 */
+        .answer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; color: white; animation: fadeIn 0.3s ease-out; }
+        .answer-label { font-size: 1.5rem; color: #FFCC80; margin-bottom: 20px; font-weight: bold; }
+        .answer-big-text { font-size: 5rem; font-weight: bold; color: #FFEB3B; text-shadow: 0 0 20px rgba(255,235,59,0.7); letter-spacing: 6px; font-family: 'Consolas', monospace; }
+        .answer-sub { font-size: 2rem; margin-top: 15px; color: #FFF; opacity: 0.9; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-8px);} 75% {transform: translateX(8px);} }
         .shake-anim { animation: shake 0.3s ease-in-out; }
 
-        .particle { position: fixed; pointer-events: none; z-index: 9999; animation: floatUp 1s ease-out forwards; }
-        @keyframes floatUp { 0% { transform: translateY(0) scale(0.5); opacity: 1; } 100% { transform: translateY(-150px) scale(1.5); opacity: 0; } }
+        .rank-title { font-size: 1.5rem; color: var(--primary); font-weight: bold; margin: 10px 0; display: block; }
+        .funny-quote { margin-top: 15px; color: #795548; font-style: italic; font-size: 1.1rem; line-height: 1.4; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; width: 90%; border-radius: 25px; padding: 1.5rem; max-height: 80vh; display: flex; flex-direction: column; border: 4px solid var(--primary); }
         .preview-list { overflow-y: auto; flex-grow: 1; border: 2px solid #eee; padding: 10px; background: #fafafa; border-radius: 10px;}
-        .preview-item { font-size: 1rem; border-bottom: 1px dashed #ddd; padding: 8px 0; }
     </style>
 </head>
 <body>
 
-<div id="correct-answer-overlay" class="answer-overlay hidden">
-    <div class="answer-title">💡 沒關係，正確拼法是：</div>
-    <div class="answer-text" id="big-answer-en">APPLE</div>
-    <div class="answer-zh" id="big-answer-zh">蘋果</div>
-    <div style="margin-top: 40px; font-size: 1.2rem; color: #AAA;">正在為你準備下一題...</div>
+<div id="answer-overlay" class="answer-overlay hidden">
+    <div class="answer-label">💡 沒關係，看清楚囉：</div>
+    <div class="answer-big-text" id="overlay-en">APPLE</div>
+    <div class="answer-sub" id="overlay-zh">蘋果</div>
 </div>
 
 <div class="card" id="setup-screen">
@@ -86,12 +83,12 @@
         <div class="group-title">🎯 2. 挑戰範圍與模式</div>
         <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
             <div style="flex: 1; display: flex; flex-direction: column;">
-                <label style="font-size: 0.8rem; font-weight:bold;">起始</label>
+                <label style="font-size: 0.8rem; font-weight:bold;">起始題號</label>
                 <input type="number" id="r-start">
             </div>
             <div style="font-weight: bold; color: var(--primary); padding-top: 15px;">~</div>
             <div style="flex: 1; display: flex; flex-direction: column;">
-                <label style="font-size: 0.8rem; font-weight:bold;">結束</label>
+                <label style="font-size: 0.8rem; font-weight:bold;">結束題號</label>
                 <input type="number" id="r-end">
             </div>
         </div>
@@ -102,7 +99,7 @@
         <input type="hidden" id="quiz-mode" value="all">
     </div>
     <div class="settings-group">
-        <div class="group-title">🗣️ 3. 語音小幫手</div>
+        <div class="group-title">🗣️ 3. 語音與速度</div>
         <select id="voice-select" style="margin-bottom: 10px;"></select>
         <div style="display: flex; align-items: center; gap: 15px;">
             <input type="range" id="voice-rate" min="0.5" max="2.0" step="0.1" value="1.0" style="flex:1;">
@@ -131,26 +128,26 @@
     </div>
     <button onclick="playVoice()" style="font-size: 4rem; background:none; border:none; cursor:pointer;">🔊</button>
     <div class="chinese-hint" id="target-zh"></div>
-    <div class="spell-display" id="user-input-display" style="font-family: monospace;"></div>
+    <div class="spell-display" id="user-input-display"></div>
     <div class="letter-grid" id="keyboard"></div>
     <div style="display: flex; gap: 15px; margin-top: 25px;">
         <button class="btn-secondary" style="flex:1" onclick="backspace()">⬅️ 倒退</button>
         <button class="btn-secondary" style="flex:1" onclick="clearInput()">🗑️ 清除</button>
     </div>
-    <div id="feedback" style="margin-top:10px; font-weight:bold;"></div>
+    <div id="feedback" style="margin-top:10px; font-weight:bold; font-size:1.2rem;"></div>
 </div>
 
 <div class="card hidden" id="result-screen">
     <h1 id="final-stars">⭐⭐⭐</h1>
-    <div id="result-body" style="line-height: 1.8; margin: 15px 0; font-size: 1.2rem; background: #f5f5f5; padding: 15px; border-radius: 15px;"></div>
-    <div id="funny-feedback" style="font-style: italic; color: #795548; margin-bottom: 20px;"></div>
+    <div id="result-body" style="line-height: 1.8; margin: 15px 0; font-size: 1.1rem; background: #f5f5f5; padding: 15px; border-radius: 15px; border: 2px dashed var(--primary);"></div>
+    <div id="funny-feedback" class="funny-quote"></div>
     <button class="btn-primary" onclick="location.reload()">再玩一次 🚀</button>
 </div>
 
 <script>
     let wordData = {}, quizList = [], currentIdx = 0, currentInput = "";
-    let attemptsLeft = 3, totalAttempts = 0, correctAnswers = 0, initialQuizCount = 0;
-    let score = 0, combo = 0;
+    let attemptsLeft = 3, initialQuizCount = 0, totalAttemptsCount = 0;
+    let score = 0;
     let synth = window.speechSynthesis, voices = [];
     let audioCtx;
 
@@ -165,7 +162,7 @@
             const response = await fetch('單字庫.TXT', { cache: "no-store" });
             const text = await response.text();
             processData(text);
-        } catch (err) { alert("讀取單字庫失敗。"); }
+        } catch (err) { alert("讀取單字庫失敗，請確認檔案存在。"); }
     }
 
     function processData(text) {
@@ -193,19 +190,19 @@
         document.getElementById('r-end').value = wordData[lvl].length;
     }
 
-    function toggleModal(show) {
-        if (show) {
-            const lvl = document.getElementById('level-select').value;
-            document.getElementById('modal-list').innerHTML = wordData[lvl].map((item, i) => 
-                `<div class="preview-item">${i+1}. ${item.en} - ${item.zh}</div>`).join('');
-            document.getElementById('preview-modal').classList.remove('hidden');
-        } else document.getElementById('preview-modal').classList.add('hidden');
-    }
-
     function setMode(mode) {
         document.getElementById('quiz-mode').value = mode;
         document.getElementById('btn-mode-all').classList.toggle('active', mode === 'all');
         document.getElementById('btn-mode-random').classList.toggle('active', mode === 'random10');
+    }
+
+    function toggleModal(show) {
+        if (show) {
+            const lvl = document.getElementById('level-select').value;
+            document.getElementById('modal-list').innerHTML = wordData[lvl].map((item, i) => 
+                `<div style="padding:8px; border-bottom:1px dashed #ddd;">${i+1}. ${item.en} - ${item.zh}</div>`).join('');
+            document.getElementById('preview-modal').classList.remove('hidden');
+        } else document.getElementById('preview-modal').classList.add('hidden');
     }
 
     function initGame() {
@@ -214,11 +211,14 @@
         const mode = document.getElementById('quiz-mode').value;
         let start = parseInt(document.getElementById('r-start').value) - 1;
         let end = parseInt(document.getElementById('r-end').value);
-        if (isNaN(start) || start < 0 || end > wordData[lvl].length) return alert("範圍錯誤");
+        if (isNaN(start) || start < 0 || end > wordData[lvl].length) return alert("範圍設定錯誤！");
 
         let baseList = wordData[lvl].slice(start, end).sort(() => Math.random() - 0.5);
         quizList = (mode === "random10") ? baseList.slice(0, 10) : baseList;
-        initialQuizCount = quizList.length; currentIdx = 0; score = 0; correctAnswers = 0;
+        
+        initialQuizCount = quizList.length; 
+        currentIdx = 0; score = 0; totalAttemptsCount = 0;
+
         document.getElementById('setup-screen').classList.add('hidden');
         document.getElementById('game-screen').classList.remove('hidden');
         loadQuestion();
@@ -253,14 +253,22 @@
         const target = quizList[currentIdx].en;
         currentInput += char;
         document.getElementById('user-input-display').innerText = currentInput.replace(/ /g, "_");
+        
         if (currentInput.length === target.length) {
+            totalAttemptsCount++;
             if (currentInput === target) {
-                if (attemptsLeft === 3) correctAnswers++;
                 score += 10;
                 playSound('correct');
                 document.getElementById('feedback').innerText = "✨ 太棒了！ ✨";
-                setTimeout(() => { currentIdx++; if (currentIdx >= quizList.length) showResult(); else loadQuestion(); }, 1000);
-            } else handleIncorrect();
+                document.getElementById('feedback').style.color = "var(--success)";
+                setTimeout(() => { 
+                    currentIdx++; 
+                    if (currentIdx >= quizList.length) showResult(); 
+                    else loadQuestion(); 
+                }, 1000);
+            } else {
+                handleIncorrect();
+            }
         }
     }
 
@@ -273,44 +281,44 @@
         if (attemptsLeft > 0) {
             currentInput = "";
             updateUI();
-            document.getElementById('feedback').innerText = "❌ 拼錯了，再試一次！";
+            document.getElementById('feedback').innerText = "❌ 差一點點，再試試！";
+            document.getElementById('feedback').style.color = "var(--error)";
         } else {
-            // 三次扣完，顯示醒目解答
-            showBrightAnswer(quizList[currentIdx]);
+            // 三次機會用完，觸發醒目答案顯示
+            showAnswerOverlay(quizList[currentIdx]);
         }
     }
 
-    // 【新增】醒目顯示正確答案的功能
-    function showBrightAnswer(wordObj) {
-        const overlay = document.getElementById('correct-answer-overlay');
-        document.getElementById('big-answer-en').innerText = wordObj.en;
-        document.getElementById('big-answer-zh').innerText = wordObj.zh;
+    function showAnswerOverlay(wordObj) {
+        const overlay = document.getElementById('answer-overlay');
+        document.getElementById('overlay-en').innerText = wordObj.en;
+        document.getElementById('overlay-zh').innerText = wordObj.zh;
         overlay.classList.remove('hidden');
 
-        // 自動朗讀兩遍正確答案
-        speakTwice(wordObj.en);
+        // 自動語音導讀
+        speakAnswerWithGuidance(wordObj.en);
 
-        // 將答錯的單字丟到最後面重新挑戰
+        // 將錯誤單字丟到最後面重新挑戰
         quizList.push(wordObj);
 
+        // 沉浸式停頓 2.5 秒
         setTimeout(() => {
             overlay.classList.add('hidden');
             currentIdx++;
             if (currentIdx >= quizList.length) showResult();
             else loadQuestion();
-        }, 3000); // 停留 3 秒
+        }, 2500);
     }
 
-    function speakTwice(text) {
+    function speakAnswerWithGuidance(word) {
         synth.cancel();
-        const utter1 = new SpeechSynthesisUtterance(text);
-        const utter2 = new SpeechSynthesisUtterance(text);
         const vIdx = document.getElementById('voice-select').value;
-        utter1.voice = voices[vIdx]; utter2.voice = voices[vIdx];
-        utter1.rate = parseFloat(document.getElementById('voice-rate').value);
-        utter2.rate = utter1.rate;
-        synth.speak(utter1);
-        setTimeout(() => synth.speak(utter2), 1000);
+        const rate = parseFloat(document.getElementById('voice-rate').value);
+        
+        const msg = new SpeechSynthesisUtterance("The answer is " + word);
+        if(voices[vIdx]) msg.voice = voices[vIdx];
+        msg.rate = rate;
+        synth.speak(msg);
     }
 
     function playSound(type) {
@@ -320,7 +328,7 @@
         osc.connect(gain); gain.connect(audioCtx.destination);
         if (type === 'correct') {
             osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.2);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.2);
         } else {
             osc.frequency.setValueAtTime(200, audioCtx.currentTime);
             osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.2);
@@ -341,16 +349,50 @@
     function showResult() {
         document.getElementById('game-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
-        const accuracy = Math.round((correctAnswers / initialQuizCount) * 100);
-        let msg = accuracy === 100 ? "你是拼字小天才！👑" : accuracy >= 80 ? "超厲害的表現！🚀" : "再接再厲，你變強了！💪";
-        document.getElementById('final-stars').innerText = accuracy >= 90 ? "⭐⭐⭐⭐⭐" : accuracy >= 60 ? "⭐⭐⭐" : "⭐";
-        document.getElementById('result-body').innerHTML = `得分：${score}<br>正確率：${accuracy}%`;
-        document.getElementById('funny-feedback').innerText = msg;
+        
+        // 新的正確率計算：原始題數 / 總嘗試次數
+        const accuracy = Math.round((initialQuizCount / totalAttemptsCount) * 100);
+        
+        let stars = "";
+        let rank = "";
+        let quote = "";
+
+        if (accuracy === 100) {
+            stars = "⭐⭐⭐⭐⭐";
+            rank = "👑 拼字傳奇：英文之神";
+            quote = "哇！你被拼字之神附身了嗎？簡直是本世紀最強的英文天才！🏆";
+        } else if (accuracy >= 85) {
+            stars = "⭐⭐⭐⭐";
+            rank = "🔥 拼字英雄：超級單字王";
+            quote = "太厲害了！你的腦袋裡一定裝了一台超級電腦吧？🚀";
+        } else if (accuracy >= 65) {
+            stars = "⭐⭐⭐";
+            rank = "🌟 拼字尖兵：智慧之星";
+            quote = "表現得相當不錯喔！腦袋裡的知識果實正在長大，再接再厲！💪";
+        } else if (accuracy >= 40) {
+            stars = "⭐⭐";
+            rank = "☘️ 拼字學徒：勇氣之星";
+            quote = "嘿！你已經成功跨出了一大步。記得嗎？愛迪生發明電燈也失敗很多次喔！🍀";
+        } else {
+            stars = "⭐";
+            rank = "🥚 拼字萌新：勇氣小雞";
+            quote = "沒關係，失敗是成功的維他命！單字們在跟你玩捉迷藏，多玩幾次就能通通抓出來！🐣";
+        }
+
+        document.getElementById('final-stars').innerText = stars;
+        document.getElementById('result-body').innerHTML = `
+            <span class="rank-title">${rank}</span>
+            🎯 挑戰單字量：${initialQuizCount} 個<br>
+            🛠️ 總試錯與挑戰：${totalAttemptsCount} 次<br>
+            📈 精確正確率：<span style="color:var(--primary); font-size:1.5rem;">${accuracy}%</span><br>
+            🏆 最終總得分：${score}
+        `;
+        document.getElementById('funny-feedback').innerText = quote;
     }
 
     function backspace() { currentInput = currentInput.slice(0, -1); updateUI(); }
     function clearInput() { currentInput = ""; updateUI(); }
-    function testVoice() { speakTwice("Hello, Ready?"); }
+    function testVoice() { speakAnswerWithGuidance("Success"); }
 
     window.onload = autoFetchData;
 </script>
