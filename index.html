@@ -28,7 +28,10 @@
         .btn-mode { flex: 1; background: white; border: 3px solid #FFCC80; color: #8D6E63; padding: 10px; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 1rem; }
         .btn-mode.active { border-color: var(--primary); background: var(--primary); color: white; transform: scale(1.05); box-shadow: 0 5px 15px rgba(255, 112, 67, 0.3); }
 
-        .game-header { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; width: 100%; margin-bottom: 10px; }
+        /* 測驗畫面頂部三欄配置 */
+        .game-header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px; gap: 5px; }
+        .header-item { display: flex; align-items: center; justify-content: center; }
+
         .info-board { display: flex; justify-content: space-between; align-items: center; background: #f5f5f5; padding: 10px 15px; border-radius: 20px; margin-bottom: 15px; border: 2px solid #eee; }
         .score-display { font-size: 1.2rem; font-weight: bold; color: #FBC02D; text-shadow: 1px 1px 0px #FFF; transition: color 0.3s; }
         .hearts-display { font-size: 1.2rem; letter-spacing: 2px; }
@@ -44,7 +47,6 @@
         .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); width: 100%; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; }
         .btn-secondary { background: white; border: 2px solid #B0BEC5; color: #546E7A; padding: 10px; border-radius: 12px; font-size: 1rem; font-weight: bold; box-shadow: 0 4px 0 #B0BEC5; cursor: pointer; }
 
-        /* 醒目答案遮罩 */
         .answer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; color: white; animation: fadeIn 0.3s ease-out; }
         .answer-label { font-size: 1.5rem; color: #FFCC80; margin-bottom: 20px; font-weight: bold; }
         .answer-big-text { font-size: 5rem; font-weight: bold; color: #FFEB3B; text-shadow: 0 0 20px rgba(255,235,59,0.7); letter-spacing: 6px; font-family: 'Consolas', monospace; }
@@ -61,7 +63,8 @@
         .modal-content { background: white; width: 90%; border-radius: 25px; padding: 1.5rem; max-height: 80vh; display: flex; flex-direction: column; border: 4px solid var(--primary); }
         .preview-list { overflow-y: auto; flex-grow: 1; border: 2px solid #eee; padding: 10px; background: #fafafa; border-radius: 10px;}
         
-        .toggle-box { background: white; border: 2px solid #FFCC80; border-radius: 10px; padding: 10px; display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+        /* 迷你的開關樣式 */
+        .header-toggle { font-size: 0.75rem; background: #E1F5FE; padding: 4px 8px; border-radius: 10px; display: flex; align-items: center; gap: 4px; border: 1px solid var(--secondary); font-weight: bold; color: #0277BD; }
     </style>
 </head>
 <body>
@@ -107,10 +110,6 @@
             <input type="range" id="voice-rate" min="0.5" max="2.0" step="0.1" value="1.0" style="flex:1;">
             <button class="btn-outline" style="width:auto; padding: 8px 12px;" onclick="testVoice()">🎵 測試</button>
         </div>
-        <div class="toggle-box">
-            <input type="checkbox" id="letter-sound-toggle" checked style="width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer;">
-            <label for="letter-sound-toggle" style="font-weight:bold; color:#795548; cursor:pointer; width:100%;">🔤 開啟按鍵發音 (打字機模式)</label>
-        </div>
     </div>
     <button class="btn-primary" id="start-btn" disabled onclick="initGame()">🚀 開始遊戲！</button>
 </div>
@@ -125,8 +124,18 @@
 
 <div class="card hidden" id="game-screen">
     <div class="game-header">
-        <button class="btn-secondary" style="padding: 5px 10px; font-size: 0.8rem;" onclick="location.reload()">🔙 返回</button>
-        <div id="quiz-progress" style="font-weight: bold; color: #795548; font-size: 0.8rem; background: #FFE082; padding: 3px 8px; border-radius: 10px;"></div>
+        <div class="header-item">
+            <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;" onclick="location.reload()">🔙 返回</button>
+        </div>
+        <div class="header-item">
+            <div class="header-toggle">
+                <input type="checkbox" id="letter-sound-toggle" checked style="cursor:pointer; width:14px; height:14px;">
+                <label for="letter-sound-toggle" style="cursor:pointer;">按鍵音</label>
+            </div>
+        </div>
+        <div class="header-item">
+            <div id="quiz-progress" style="font-weight: bold; color: #795548; font-size: 0.8rem; background: #FFE082; padding: 3px 8px; border-radius: 10px;"></div>
+        </div>
     </div>
     <div class="info-board">
         <div class="hearts-display" id="hearts-display">❤️❤️❤️</div>
@@ -255,19 +264,17 @@
         document.getElementById('feedback').innerText = "";
     }
 
-    // 【新增】唸出單一字母的函數
     function speakLetter(char) {
-        synth.cancel(); // 停止先前的聲音，讓字母即時發出
+        synth.cancel();
         let textToSpeak = (char === ' ') ? 'space' : char;
         const utter = new SpeechSynthesisUtterance(textToSpeak);
         const vIdx = document.getElementById('voice-select').value;
         if(voices[vIdx]) utter.voice = voices[vIdx];
-        utter.rate = parseFloat(document.getElementById('voice-rate').value) * 1.2; // 字母唸快一點點會比較順
+        utter.rate = parseFloat(document.getElementById('voice-rate').value) * 1.2;
         synth.speak(utter);
     }
 
     function pressKey(char) {
-        // 【新增】檢查開關是否開啟，若開啟則發出字母音
         if (document.getElementById('letter-sound-toggle').checked) {
             speakLetter(char);
         }
@@ -279,12 +286,10 @@
         if (currentInput.length === target.length) {
             totalAttemptsCount++;
             if (currentInput === target) {
-                // 答對加 10 分
                 score += 10;
                 playSound('correct');
                 document.getElementById('score-display').style.color = "var(--success)";
                 setTimeout(() => document.getElementById('score-display').style.color = "#FBC02D", 500);
-                
                 document.getElementById('feedback').innerText = "✨ 太棒了！ (+10分) ✨";
                 document.getElementById('feedback').style.color = "var(--success)";
                 
@@ -301,14 +306,10 @@
 
     function handleIncorrect() {
         attemptsLeft--;
-        
-        // 答錯扣 3 分，最低 0 分
         score = Math.max(0, score - 3);
-        
         playSound('incorrect');
         document.getElementById('score-display').style.color = "var(--error)";
         setTimeout(() => document.getElementById('score-display').style.color = "#FBC02D", 500);
-        
         document.getElementById('game-screen').classList.add('shake-anim');
         setTimeout(() => document.getElementById('game-screen').classList.remove('shake-anim'), 300);
         
@@ -319,7 +320,6 @@
             document.getElementById('feedback').style.color = "var(--error)";
         } else {
             updateUI(); 
-            // 三次機會用完，觸發醒目答案顯示
             showAnswerOverlay(quizList[currentIdx]);
         }
     }
@@ -330,13 +330,9 @@
         document.getElementById('overlay-zh').innerText = wordObj.zh;
         overlay.classList.remove('hidden');
 
-        // 自動語音導讀 The answer is...
         speakAnswerWithGuidance(wordObj.en);
-
-        // 將錯誤單字丟到最後面重新挑戰
         quizList.push(wordObj);
 
-        // 沉浸式停頓 2.5 秒
         setTimeout(() => {
             overlay.classList.add('hidden');
             currentIdx++;
@@ -349,7 +345,6 @@
         synth.cancel();
         const vIdx = document.getElementById('voice-select').value;
         const rate = parseFloat(document.getElementById('voice-rate').value);
-        
         const msg = new SpeechSynthesisUtterance("The answer is " + word);
         if(voices[vIdx]) msg.voice = voices[vIdx];
         msg.rate = rate;
@@ -385,35 +380,14 @@
     function showResult() {
         document.getElementById('game-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
-        
-        // 正確率計算：原始題數 / 總嘗試次數
         const accuracy = Math.round((initialQuizCount / totalAttemptsCount) * 100);
         
-        let stars = "";
-        let rank = "";
-        let quote = "";
-
-        if (accuracy === 100) {
-            stars = "⭐⭐⭐⭐⭐";
-            rank = "👑 拼字傳奇：英文之神";
-            quote = "哇！你被拼字之神附身了嗎？簡直是本世紀最強的英文天才！🏆";
-        } else if (accuracy >= 85) {
-            stars = "⭐⭐⭐⭐";
-            rank = "🔥 拼字英雄：超級單字王";
-            quote = "太厲害了！你的腦袋裡一定裝了一台超級電腦吧？🚀";
-        } else if (accuracy >= 65) {
-            stars = "⭐⭐⭐";
-            rank = "🌟 拼字尖兵：智慧之星";
-            quote = "表現得相當不錯喔！腦袋裡的知識果實正在長大，再接再厲！💪";
-        } else if (accuracy >= 40) {
-            stars = "⭐⭐";
-            rank = "☘️ 拼字學徒：勇氣之星";
-            quote = "嘿！你已經成功跨出了一大步。記得嗎？愛迪生發明電燈也失敗很多次喔！🍀";
-        } else {
-            stars = "⭐";
-            rank = "🥚 拼字萌新：勇氣小雞";
-            quote = "沒關係，失敗是成功的維他命！單字們在跟你玩捉迷藏，多玩幾次就能通通抓出來！🐣";
-        }
+        let stars = "", rank = "", quote = "";
+        if (accuracy === 100) { stars = "⭐⭐⭐⭐⭐"; rank = "👑 拼字傳奇：英文之神"; quote = "哇！你被拼字之神附身了嗎？簡直是本世紀最強的英文天才！🏆"; }
+        else if (accuracy >= 85) { stars = "⭐⭐⭐⭐"; rank = "🔥 拼字英雄：超級單字王"; quote = "太厲害了！你的腦袋裡一定裝了一台超級電腦吧？🚀"; }
+        else if (accuracy >= 65) { stars = "⭐⭐⭐"; rank = "🌟 拼字尖兵：智慧之星"; quote = "表現得相當不錯喔！腦袋裡的知識果實正在長大，再接再厲！💪"; }
+        else if (accuracy >= 40) { stars = "⭐⭐"; rank = "☘️ 拼字學徒：勇氣之星"; quote = "嘿！你已經成功跨出了一大步。記得嗎？愛迪生發明電燈也失敗很多次喔！🍀"; }
+        else { stars = "⭐"; rank = "🥚 拼字萌新：勇氣小雞"; quote = "沒關係，失敗是成功的維他命！單字們在跟你玩捉迷藏，多玩幾次就能通通抓出來！🐣"; }
 
         document.getElementById('final-stars').innerText = stars;
         document.getElementById('result-body').innerHTML = `
