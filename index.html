@@ -16,7 +16,22 @@
         * { box-sizing: border-box; touch-action: manipulation; }
         body { font-family: 'Comic Sans MS', 'Segoe UI', system-ui, sans-serif; background-color: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; overflow-x: hidden; }
         
-        .card { background: white; padding: 1.5rem; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 480px; text-align: center; position: relative; border: 4px solid white; }
+        /* 📱 手機與 💻 平板通用 Card 設計 */
+        .card { 
+            background: white; 
+            padding: 1.5rem; 
+            border-radius: 25px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            width: 98%; 
+            max-width: 850px; /* 放大上限，支援 iPad 橫/直向 */
+            min-height: 85vh; /* 確保高度充實，不會被上下工具列擠壓 */
+            display: flex;
+            flex-direction: column;
+            text-align: center; 
+            position: relative; 
+            border: 4px solid white; 
+            margin: auto;
+        }
         .hidden { display: none !important; }
         
         h1 { color: var(--primary); margin: 0 0 1rem 0; font-size: 1.8rem; text-shadow: 2px 2px 0px #ffe0b2; }
@@ -28,7 +43,6 @@
         .btn-mode { flex: 1; background: white; border: 3px solid #FFCC80; color: #8D6E63; padding: 10px; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 1rem; }
         .btn-mode.active { border-color: var(--primary); background: var(--primary); color: white; transform: scale(1.05); box-shadow: 0 5px 15px rgba(255, 112, 67, 0.3); }
 
-        /* 測驗畫面頂部三欄配置 */
         .game-header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px; gap: 5px; }
         .header-item { display: flex; align-items: center; justify-content: center; }
 
@@ -43,7 +57,7 @@
         .letter-btn { background: white; border: 3px solid var(--secondary); color: var(--secondary); padding: 12px 2px; border-radius: 15px; font-size: 1.6rem; font-weight: bold; box-shadow: 0 6px 0 var(--secondary); transition: 0.1s; cursor: pointer; }
         .letter-btn:active { transform: translateY(6px); box-shadow: 0 0 0 var(--secondary); }
         
-        .btn-primary { background: var(--success); color: white; width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: bold; font-size: 1.2rem; margin-top: 5px; box-shadow: 0 6px 0 #388E3C; cursor: pointer; }
+        .btn-primary { background: var(--success); color: white; width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: bold; font-size: 1.2rem; margin-top: auto; box-shadow: 0 6px 0 #388E3C; cursor: pointer; }
         .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); width: 100%; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; }
         .btn-secondary { background: white; border: 2px solid #B0BEC5; color: #546E7A; padding: 10px; border-radius: 12px; font-size: 1rem; font-weight: bold; box-shadow: 0 4px 0 #B0BEC5; cursor: pointer; }
 
@@ -60,11 +74,26 @@
         .funny-quote { margin-top: 15px; color: #795548; font-style: italic; font-size: 1.1rem; line-height: 1.4; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; width: 90%; border-radius: 25px; padding: 1.5rem; max-height: 80vh; display: flex; flex-direction: column; border: 4px solid var(--primary); }
+        .modal-content { background: white; width: 90%; max-width: 600px; border-radius: 25px; padding: 1.5rem; max-height: 80vh; display: flex; flex-direction: column; border: 4px solid var(--primary); }
         .preview-list { overflow-y: auto; flex-grow: 1; border: 2px solid #eee; padding: 10px; background: #fafafa; border-radius: 10px;}
         
-        /* 迷你的開關樣式 */
-        .header-toggle { font-size: 0.75rem; background: #E1F5FE; padding: 4px 8px; border-radius: 10px; display: flex; align-items: center; gap: 4px; border: 1px solid var(--secondary); font-weight: bold; color: #0277BD; }
+        .header-toggle { font-size: 0.8rem; background: #E1F5FE; padding: 6px 10px; border-radius: 10px; display: flex; align-items: center; gap: 4px; border: 1px solid var(--secondary); font-weight: bold; color: #0277BD; }
+
+        /* 💻 iPad / 大螢幕專屬優化 */
+        @media (min-width: 600px) {
+            h1 { font-size: 2.5rem; }
+            .card { padding: 2.5rem; }
+            .chinese-hint { font-size: 3.5rem; margin: 20px 0; }
+            .spell-display { font-size: 4rem; min-height: 5rem; }
+            .letter-grid { gap: 15px; margin-bottom: 20px;}
+            .letter-btn { padding: 25px 5px; font-size: 2.2rem; border-radius: 20px; border-width: 4px; box-shadow: 0 8px 0 var(--secondary); }
+            .letter-btn:active { transform: translateY(8px); }
+            .score-display, .hearts-display { font-size: 1.8rem; }
+            .btn-primary { font-size: 1.5rem; padding: 20px; }
+            .header-toggle { font-size: 1.2rem; padding: 8px 15px; }
+            #feedback { font-size: 1.5rem; min-height: 2rem; }
+            select, input { font-size: 1.2rem; }
+        }
     </style>
 </head>
 <body>
@@ -111,51 +140,54 @@
             <button class="btn-outline" style="width:auto; padding: 8px 12px;" onclick="testVoice()">🎵 測試</button>
         </div>
     </div>
+    <div style="flex-grow: 1;"></div>
     <button class="btn-primary" id="start-btn" disabled onclick="initGame()">🚀 開始遊戲！</button>
 </div>
 
 <div id="preview-modal" class="modal-overlay hidden">
     <div class="modal-content">
-        <h3 style="color:var(--primary);">👀 字庫預覽</h3>
+        <h3 style="color:var(--primary); margin-top:0;">👀 字庫預覽</h3>
         <div class="preview-list" id="modal-list"></div>
-        <button class="btn-primary" style="margin-top:10px;" onclick="toggleModal(false)">關閉</button>
+        <button class="btn-primary" style="margin-top:15px; padding: 10px;" onclick="toggleModal(false)">關閉</button>
     </div>
 </div>
 
 <div class="card hidden" id="game-screen">
     <div class="game-header">
         <div class="header-item">
-            <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;" onclick="location.reload()">🔙 返回</button>
+            <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.9rem;" onclick="location.reload()">🔙 返回</button>
         </div>
         <div class="header-item">
             <div class="header-toggle">
-                <input type="checkbox" id="letter-sound-toggle" checked style="cursor:pointer; width:14px; height:14px;">
+                <input type="checkbox" id="letter-sound-toggle" checked style="cursor:pointer; width:16px; height:16px;">
                 <label for="letter-sound-toggle" style="cursor:pointer;">按鍵音</label>
             </div>
         </div>
         <div class="header-item">
-            <div id="quiz-progress" style="font-weight: bold; color: #795548; font-size: 0.8rem; background: #FFE082; padding: 3px 8px; border-radius: 10px;"></div>
+            <div id="quiz-progress" style="font-weight: bold; color: #795548; font-size: 0.9rem; background: #FFE082; padding: 4px 10px; border-radius: 10px;"></div>
         </div>
     </div>
     <div class="info-board">
         <div class="hearts-display" id="hearts-display">❤️❤️❤️</div>
         <div class="score-display" id="score-display">⭐ 0</div>
     </div>
-    <button onclick="playVoice()" style="font-size: 4rem; background:none; border:none; cursor:pointer;">🔊</button>
+    <button onclick="playVoice()" style="font-size: 4rem; background:none; border:none; cursor:pointer; margin: 10px 0;">🔊</button>
     <div class="chinese-hint" id="target-zh"></div>
     <div class="spell-display" id="user-input-display"></div>
     <div class="letter-grid" id="keyboard"></div>
-    <div style="display: flex; gap: 15px; margin-top: 25px;">
-        <button class="btn-secondary" style="flex:1" onclick="backspace()">⬅️ 倒退</button>
-        <button class="btn-secondary" style="flex:1" onclick="clearInput()">🗑️ 清除</button>
-    </div>
+    <div style="flex-grow: 1;"></div>
     <div id="feedback" style="margin-top:10px; font-weight:bold; font-size:1.1rem; min-height:1.5rem;"></div>
+    <div style="display: flex; gap: 15px; margin-top: 15px;">
+        <button class="btn-secondary" style="flex:1; padding: 15px; font-size: 1.1rem;" onclick="backspace()">⬅️ 倒退</button>
+        <button class="btn-secondary" style="flex:1; padding: 15px; font-size: 1.1rem;" onclick="clearInput()">🗑️ 清除</button>
+    </div>
 </div>
 
 <div class="card hidden" id="result-screen">
-    <h1 id="final-stars">⭐⭐⭐</h1>
-    <div id="result-body" style="line-height: 1.8; margin: 15px 0; font-size: 1.1rem; background: #f5f5f5; padding: 15px; border-radius: 15px; border: 2px dashed var(--primary);"></div>
+    <h1 id="final-stars" style="font-size: 3rem;">⭐⭐⭐</h1>
+    <div id="result-body" style="line-height: 1.8; margin: 15px 0; font-size: 1.2rem; background: #f5f5f5; padding: 20px; border-radius: 15px; border: 2px dashed var(--primary);"></div>
     <div id="funny-feedback" class="funny-quote"></div>
+    <div style="flex-grow: 1;"></div>
     <button class="btn-primary" onclick="location.reload()">再玩一次 🚀</button>
 </div>
 
@@ -166,11 +198,41 @@
     let synth = window.speechSynthesis, voices = [];
     let audioCtx;
 
+    // 🍎 增強版語音初始化：針對 iOS Safari 進行優化
     function initVoices() {
-        voices = synth.getVoices().filter(v => v.lang.includes('en'));
-        document.getElementById('voice-select').innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
+        let allVoices = synth.getVoices();
+        // 嘗試篩選英文語音
+        voices = allVoices.filter(v => v.lang.includes('en') || v.lang.includes('EN'));
+        // 如果都沒篩到 (某些系統標籤奇怪)，就退回顯示全部
+        if (voices.length === 0 && allVoices.length > 0) {
+            voices = allVoices; 
+        }
+        
+        const select = document.getElementById('voice-select');
+        select.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name} (${v.lang})</option>`).join('');
+        
+        // 自動選擇較好聽的女聲 (iOS 優先選 Samantha，Android 預設)
+        let defaultIdx = voices.findIndex(v => v.name.includes('Samantha') || v.name.includes('Google US English'));
+        if(defaultIdx >= 0 && select.options.length > 0) select.value = defaultIdx;
     }
-    if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = initVoices;
+    
+    // iOS 有時需要透過事件觸發才能抓到語音清單
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = initVoices;
+    }
+    // 延遲執行一次以防萬一
+    setTimeout(initVoices, 200);
+
+    // 確保點擊按鈕時解鎖 iOS 的語音及音效限制
+    function unlockAudioForIOS() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        
+        // 播放一段無聲語音來騙過 iOS 權限
+        let silent = new SpeechSynthesisUtterance('');
+        silent.volume = 0;
+        synth.speak(silent);
+    }
 
     async function autoFetchData() {
         try {
@@ -221,7 +283,8 @@
     }
 
     function initGame() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        unlockAudioForIOS(); // 進入遊戲時強制解鎖音訊
+
         const lvl = document.getElementById('level-select').value;
         const mode = document.getElementById('quiz-mode').value;
         let start = parseInt(document.getElementById('r-start').value) - 1;
@@ -271,6 +334,7 @@
         const vIdx = document.getElementById('voice-select').value;
         if(voices[vIdx]) utter.voice = voices[vIdx];
         utter.rate = parseFloat(document.getElementById('voice-rate').value) * 1.2;
+        utter.volume = 1;
         synth.speak(utter);
     }
 
@@ -348,11 +412,13 @@
         const msg = new SpeechSynthesisUtterance("The answer is " + word);
         if(voices[vIdx]) msg.voice = voices[vIdx];
         msg.rate = rate;
+        msg.volume = 1;
         synth.speak(msg);
     }
 
     function playSound(type) {
         if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
@@ -374,7 +440,13 @@
         const vIdx = document.getElementById('voice-select').value;
         if(voices[vIdx]) utter.voice = voices[vIdx];
         utter.rate = parseFloat(document.getElementById('voice-rate').value);
+        utter.volume = 1;
         synth.speak(utter);
+    }
+
+    function testVoice() { 
+        unlockAudioForIOS();
+        speakAnswerWithGuidance("Success"); 
     }
 
     function showResult() {
@@ -402,7 +474,6 @@
 
     function backspace() { currentInput = currentInput.slice(0, -1); updateUI(); }
     function clearInput() { currentInput = ""; updateUI(); }
-    function testVoice() { speakAnswerWithGuidance("Success"); }
 
     window.onload = autoFetchData;
 </script>
