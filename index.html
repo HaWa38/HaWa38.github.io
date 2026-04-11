@@ -23,8 +23,8 @@
             border-radius: 25px; 
             box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
             width: 98%; 
-            max-width: 850px; /* 放大上限，支援 iPad 橫/直向 */
-            min-height: 85vh; /* 確保高度充實，不會被上下工具列擠壓 */
+            max-width: 850px; 
+            min-height: 85vh; 
             display: flex;
             flex-direction: column;
             text-align: center; 
@@ -38,7 +38,8 @@
         
         .settings-group { background: #FFF3E0; padding: 12px; border-radius: 15px; border: 2px dashed #FFB74D; text-align: left; margin-bottom: 15px; }
         .group-title { font-size: 0.95rem; font-weight: bold; margin-bottom: 8px; color: var(--primary); }
-        select, input[type="number"], input[type="range"] { width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #FFCC80; font-size: 1rem; margin-bottom: 5px; outline: none; }
+        select, input[type="number"], input[type="range"], input[type="text"] { width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #FFCC80; font-size: 1rem; margin-bottom: 5px; outline: none; }
+        input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 8px rgba(255,112,67,0.3); }
         
         .btn-mode { flex: 1; background: white; border: 3px solid #FFCC80; color: #8D6E63; padding: 10px; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 1rem; }
         .btn-mode.active { border-color: var(--primary); background: var(--primary); color: white; transform: scale(1.05); box-shadow: 0 5px 15px rgba(255, 112, 67, 0.3); }
@@ -98,14 +99,21 @@
 </head>
 <body>
 
-<div id="answer-overlay" class="answer-overlay hidden">
-    <div class="answer-label">💡 沒關係，看清楚囉：</div>
-    <div class="answer-big-text" id="overlay-en">APPLE</div>
-    <div class="answer-sub" id="overlay-zh">蘋果</div>
+<div class="card" id="login-screen">
+    <h1>🎈 兒童趣味拼字 🎈</h1>
+    <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
+        <div style="background: #FFF3E0; padding: 25px 15px; border-radius: 20px; border: 2px dashed #FFB74D;">
+            <label for="user-id-input" style="font-size: 1.3rem; font-weight: bold; color: var(--primary); display: block; margin-bottom: 15px;">👤 請輸入挑戰者 ID 或姓名：</label>
+            <input type="text" id="user-id-input" placeholder="例如：Kevin 或 小明" style="font-size: 1.5rem; text-align: center; padding: 15px; border-width: 3px;" onkeypress="handleLoginEnter(event)">
+        </div>
+    </div>
+    <button class="btn-primary" onclick="processLogin()">進入設定 ➡️</button>
 </div>
 
-<div class="card" id="setup-screen">
-    <h1>🎈 兒童趣味拼字 🎈</h1>
+<div class="card hidden" id="setup-screen">
+    <h1>🎈 遊戲設定 🎈</h1>
+    <div id="welcome-msg" style="font-size: 1.2rem; font-weight: bold; color: var(--secondary); margin-bottom: 15px;"></div>
+    
     <div class="settings-group">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <div class="group-title" style="margin: 0;">📚 1. 選擇單字庫</div>
@@ -142,6 +150,12 @@
     </div>
     <div style="flex-grow: 1;"></div>
     <button class="btn-primary" id="start-btn" disabled onclick="initGame()">🚀 開始遊戲！</button>
+</div>
+
+<div id="answer-overlay" class="answer-overlay hidden">
+    <div class="answer-label">💡 沒關係，看清楚囉：</div>
+    <div class="answer-big-text" id="overlay-en">APPLE</div>
+    <div class="answer-sub" id="overlay-zh">蘋果</div>
 </div>
 
 <div id="preview-modal" class="modal-overlay hidden">
@@ -186,9 +200,12 @@
 <div class="card hidden" id="result-screen">
     <h1 id="final-stars" style="font-size: 3rem;">⭐⭐⭐</h1>
     <div id="result-body" style="line-height: 1.8; margin: 15px 0; font-size: 1.2rem; background: #f5f5f5; padding: 20px; border-radius: 15px; border: 2px dashed var(--primary);"></div>
-    <div id="funny-feedback" class="funny-quote"></div>
+    <div id="funny-feedback" class="funny-quote" style="margin-bottom: 20px;"></div>
     <div style="flex-grow: 1;"></div>
-    <button class="btn-primary" onclick="location.reload()">再玩一次 🚀</button>
+    <div style="display: flex; gap: 10px; flex-direction: column;">
+        <button class="btn-outline" style="border-width: 3px; font-size: 1.2rem; padding: 15px;" onclick="downloadResultFile()">📥 下載成績單 (TXT)</button>
+        <button class="btn-primary" onclick="location.reload()">再玩一次 🚀</button>
+    </div>
 </div>
 
 <script>
@@ -197,41 +214,48 @@
     let score = 0;
     let synth = window.speechSynthesis, voices = [];
     let audioCtx;
+    
+    // 🆕 使用者資訊與成績紀錄變數
+    let currentUserId = "";
+    let finalReportText = "";
 
-    // 🍎 增強版語音初始化：針對 iOS Safari 進行優化
     function initVoices() {
         let allVoices = synth.getVoices();
-        // 嘗試篩選英文語音
         voices = allVoices.filter(v => v.lang.includes('en') || v.lang.includes('EN'));
-        // 如果都沒篩到 (某些系統標籤奇怪)，就退回顯示全部
-        if (voices.length === 0 && allVoices.length > 0) {
-            voices = allVoices; 
-        }
+        if (voices.length === 0 && allVoices.length > 0) voices = allVoices; 
         
         const select = document.getElementById('voice-select');
         select.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name} (${v.lang})</option>`).join('');
-        
-        // 自動選擇較好聽的女聲 (iOS 優先選 Samantha，Android 預設)
         let defaultIdx = voices.findIndex(v => v.name.includes('Samantha') || v.name.includes('Google US English'));
         if(defaultIdx >= 0 && select.options.length > 0) select.value = defaultIdx;
     }
     
-    // iOS 有時需要透過事件觸發才能抓到語音清單
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = initVoices;
-    }
-    // 延遲執行一次以防萬一
+    if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = initVoices;
     setTimeout(initVoices, 200);
 
-    // 確保點擊按鈕時解鎖 iOS 的語音及音效限制
     function unlockAudioForIOS() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
+        let silent = new SpeechSynthesisUtterance(''); silent.volume = 0; synth.speak(silent);
+    }
+
+    // 🆕 處理登入邏輯
+    function handleLoginEnter(event) {
+        if (event.key === "Enter") processLogin();
+    }
+
+    function processLogin() {
+        const input = document.getElementById('user-id-input').value.trim();
+        if (!input) {
+            alert("請輸入挑戰者 ID 喔！");
+            return;
+        }
+        currentUserId = input;
+        document.getElementById('welcome-msg').innerText = `你好，${currentUserId}！準備好挑戰了嗎？`;
         
-        // 播放一段無聲語音來騙過 iOS 權限
-        let silent = new SpeechSynthesisUtterance('');
-        silent.volume = 0;
-        synth.speak(silent);
+        // 切換畫面
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('setup-screen').classList.remove('hidden');
     }
 
     async function autoFetchData() {
@@ -283,8 +307,7 @@
     }
 
     function initGame() {
-        unlockAudioForIOS(); // 進入遊戲時強制解鎖音訊
-
+        unlockAudioForIOS(); 
         const lvl = document.getElementById('level-select').value;
         const mode = document.getElementById('quiz-mode').value;
         let start = parseInt(document.getElementById('r-start').value) - 1;
@@ -339,9 +362,7 @@
     }
 
     function pressKey(char) {
-        if (document.getElementById('letter-sound-toggle').checked) {
-            speakLetter(char);
-        }
+        if (document.getElementById('letter-sound-toggle').checked) speakLetter(char);
 
         const target = quizList[currentIdx].en;
         currentInput += char;
@@ -411,9 +432,7 @@
         const rate = parseFloat(document.getElementById('voice-rate').value);
         const msg = new SpeechSynthesisUtterance("The answer is " + word);
         if(voices[vIdx]) msg.voice = voices[vIdx];
-        msg.rate = rate;
-        msg.volume = 1;
-        synth.speak(msg);
+        msg.rate = rate; msg.volume = 1; synth.speak(msg);
     }
 
     function playSound(type) {
@@ -440,14 +459,10 @@
         const vIdx = document.getElementById('voice-select').value;
         if(voices[vIdx]) utter.voice = voices[vIdx];
         utter.rate = parseFloat(document.getElementById('voice-rate').value);
-        utter.volume = 1;
-        synth.speak(utter);
+        utter.volume = 1; synth.speak(utter);
     }
 
-    function testVoice() { 
-        unlockAudioForIOS();
-        speakAnswerWithGuidance("Success"); 
-    }
+    function testVoice() { unlockAudioForIOS(); speakAnswerWithGuidance("Success"); }
 
     function showResult() {
         document.getElementById('game-screen').classList.add('hidden');
@@ -464,12 +479,49 @@
         document.getElementById('final-stars').innerText = stars;
         document.getElementById('result-body').innerHTML = `
             <span class="rank-title">${rank}</span>
+            👤 挑戰者：${currentUserId}<br>
             🎯 挑戰單字量：${initialQuizCount} 個<br>
             🛠️ 總試錯與挑戰：${totalAttemptsCount} 次<br>
             📈 精確正確率：<span style="color:var(--primary); font-size:1.5rem;">${accuracy}%</span><br>
             🏆 最終總得分：<span style="color:#FBC02D; font-size:1.5rem; font-weight:bold;">${score}</span>
         `;
         document.getElementById('funny-feedback').innerText = quote;
+
+        // 🆕 準備要下載的成績單內容
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+        const modeText = document.getElementById('quiz-mode').value === 'all' ? '全部挑戰' : '隨機10題';
+        const levelText = document.getElementById('level-select').value;
+
+        finalReportText = `=== 🎈 兒童趣味拼字 成績紀錄單 🎈 ===\r\n` +
+                          `測驗時間: ${dateStr}\r\n` +
+                          `挑戰者 ID: ${currentUserId}\r\n` +
+                          `-----------------------------------\r\n` +
+                          `測驗字庫: ${levelText}\r\n` +
+                          `挑戰模式: ${modeText}\r\n` +
+                          `單字總數: ${initialQuizCount} 個\r\n` +
+                          `總答題次數: ${totalAttemptsCount} 次\r\n` +
+                          `精確正確率: ${accuracy}%\r\n` +
+                          `最終總得分: ${score} 分\r\n` +
+                          `獲得頭銜: ${rank.replace(/[^a-zA-Z\u4e00-\u9fa5]/g, '')}\r\n` + // 簡單過濾掉 Emoji，確保 TXT 相容性
+                          `===================================\r\n`;
+    }
+
+    // 🆕 下載成績單的功能 (Blob API)
+    function downloadResultFile() {
+        if (!finalReportText) return;
+        // 建立 Blob 物件 (文字檔)
+        const blob = new Blob([finalReportText], { type: "text/plain;charset=utf-8" });
+        // 建立隱藏的下載連結
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `result_${currentUserId}.txt`; // 預設檔名加上使用者 ID
+        // 觸發點擊下載
+        document.body.appendChild(link);
+        link.click();
+        // 清理殘留連結
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
     }
 
     function backspace() { currentInput = currentInput.slice(0, -1); updateUI(); }
