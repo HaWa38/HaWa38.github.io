@@ -107,16 +107,26 @@
 
 <div id="instructions-modal" class="modal-overlay hidden">
     <div class="modal-content">
-        <h2 style="color:var(--primary); text-align: center; margin-top:0;">📖 遊戲使用說明</h2>
-        <div class="preview-list" style="font-size: 1.1rem;">
-            <p><strong>1. 準備階段：</strong>選擇適合您的單字庫等級，並設定要挑戰的題數範圍。</p>
-            <p><strong>2. 聆聽與拼字：</strong>進入測驗後，請點擊上方喇叭聆聽發音，並使用下方鍵盤拼出正確的英文單字。</p>
-            <p><strong>3. 挑戰規則：</strong>
-                <br>✔️ 拼對一次獲得 10 分。
-                <br>❌ 每題有 3 次機會，答錯扣 3 分。
-                <br>💡 3 次都答錯系統會顯示正確解答，並將該題留到最後重新測驗。
-            </p>
-            <p><strong>4. 結算成績：</strong>全部答對後，會根據您的精確度給予星星評價與專屬稱號喔！</p>
+        <h2 style="color:var(--secondary); text-align: center; margin-top: 0; border-bottom: 2px dashed #eee; padding-bottom: 10px;">🌟 遊戲規則說明</h2>
+        <div class="guide-step">
+            <div class="step-num">1</div>
+            <div><strong>設定關卡：</strong>選擇適合的單字等級與範圍，點擊「預覽」可以先複習喔！</div>
+        </div>
+        <div class="guide-step">
+            <div class="step-num">2</div>
+            <div><strong>聽聲辨字：</strong>點擊測驗中的 🔊 圖示聽發音，用下方的字母鍵拼出單字。</div>
+        </div>
+        <div class="guide-step">
+            <div class="step-num">3</div>
+            <div><strong>愛心挑戰：</strong>每題有 3 次機會 ❤️，拼錯會扣分；若 3 次全錯會顯示答案，該題會移到最後讓你重新練習。</div>
+        </div>
+        <div class="guide-step">
+            <div class="step-num">4</div>
+            <div><strong>按鍵發音：</strong>開啟右上角「按鍵發音」功能，點擊字母時會同步讀出該字母。</div>
+        </div>
+        <div class="guide-step">
+            <div class="step-num">5</div>
+            <div><strong>爭取星星：</strong>正確率越高，最後獲得的星星 ⭐ 就越多！</div>
         </div>
         <button class="btn-primary" style="margin-top:15px;" onclick="toggleInstructions(false)">我知道了 🚀</button>
     </div>
