@@ -3,76 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🎈 兒童趣味拼字挑戰 - 平台優化版 🎈</title>
+    <title>🎈 兒童趣味拼字挑戰 - 專業恢復版 🎈</title>
     <style>
         :root { 
-            --primary: #FF7043; 
-            --secondary: #42A5F5; 
-            --success: #66BB6A; 
-            --error: #EF5350; 
-            --bg: #E0F7FA; 
-            --text: #455A64;
+            --primary: #FF7043; --secondary: #42A5F5; --success: #66BB6A; 
+            --error: #EF5350; --bg: #E0F7FA; --text: #455A64;
         }
         * { box-sizing: border-box; touch-action: manipulation; }
         body { font-family: 'Comic Sans MS', 'Segoe UI', system-ui, sans-serif; background-color: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; overflow-x: hidden; }
         
         .card { 
-            background: white; 
-            padding: 1.5rem; 
-            border-radius: 25px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
-            width: 98%; 
-            max-width: 850px; 
-            min-height: 85vh; 
-            display: flex;
-            flex-direction: column;
-            text-align: center; 
-            position: relative; 
-            border: 4px solid white; 
-            margin: auto;
+            background: white; padding: 1.5rem; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            width: 98%; max-width: 850px; min-height: 85vh; display: flex; flex-direction: column;
+            text-align: center; position: relative; border: 4px solid white; margin: auto;
         }
         .hidden { display: none !important; }
         
         h1 { color: var(--primary); margin: 0 0 1rem 0; font-size: 1.8rem; text-shadow: 2px 2px 0px #ffe0b2; }
-        
         .settings-group { background: #FFF3E0; padding: 12px; border-radius: 15px; border: 2px dashed #FFB74D; text-align: left; margin-bottom: 15px; }
         .group-title { font-size: 0.95rem; font-weight: bold; margin-bottom: 8px; color: var(--primary); }
-        select, input[type="number"], input[type="range"], input[type="text"] { width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #FFCC80; font-size: 1rem; margin-bottom: 5px; outline: none; }
+        
+        select, input { width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #FFCC80; font-size: 1rem; margin-bottom: 5px; outline: none; }
         
         .btn-mode { flex: 1; background: white; border: 3px solid #FFCC80; color: #8D6E63; padding: 10px; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 1rem; }
-        .btn-mode.active { border-color: var(--primary); background: var(--primary); color: white; transform: scale(1.05); box-shadow: 0 5px 15px rgba(255, 112, 67, 0.3); }
+        .btn-mode.active { border-color: var(--primary); background: var(--primary); color: white; transform: scale(1.05); }
 
-        .game-header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px; gap: 5px; }
-        .info-board { display: flex; justify-content: space-between; align-items: center; background: #f5f5f5; padding: 10px 15px; border-radius: 20px; margin-bottom: 15px; border: 2px solid #eee; }
-        .score-display { font-size: 1.2rem; font-weight: bold; color: #FBC02D; text-shadow: 1px 1px 0px #FFF; }
-        .hearts-display { font-size: 1.2rem; letter-spacing: 2px; }
-
+        .game-header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px; }
+        .info-board { display: flex; justify-content: space-between; align-items: center; background: #f5f5f5; padding: 10px 15px; border-radius: 20px; border: 2px solid #eee; margin-bottom: 10px; }
+        
         .chinese-hint { font-size: 2rem; font-weight: bold; margin: 10px 0; color: var(--secondary); }
-        .spell-display { font-size: 2.5rem; letter-spacing: 4px; color: var(--text); border-bottom: 4px dashed var(--primary); display: inline-block; min-width: 200px; min-height: 3.2rem; margin-bottom: 15px; white-space: pre; font-family: 'Consolas', monospace; }
+        .spell-display { font-size: 2.5rem; letter-spacing: 4px; color: var(--text); border-bottom: 4px dashed var(--primary); display: inline-block; min-width: 200px; min-height: 3.2rem; margin-bottom: 15px; font-family: 'Consolas', monospace; }
         
         .letter-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-        .letter-btn { background: white; border: 3px solid var(--secondary); color: var(--secondary); padding: 12px 2px; border-radius: 15px; font-size: 1.6rem; font-weight: bold; box-shadow: 0 6px 0 var(--secondary); transition: 0.1s; cursor: pointer; }
+        .letter-btn { background: white; border: 3px solid var(--secondary); color: var(--secondary); padding: 12px 2px; border-radius: 15px; font-size: 1.6rem; font-weight: bold; box-shadow: 0 6px 0 var(--secondary); cursor: pointer; }
         .letter-btn:active { transform: translateY(6px); box-shadow: 0 0 0 var(--secondary); }
         
         .btn-primary { background: var(--success); color: white; width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: bold; font-size: 1.2rem; margin-top: auto; box-shadow: 0 6px 0 #388E3C; cursor: pointer; }
-        .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); width: 100%; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .btn-secondary { background: white; border: 2px solid #B0BEC5; color: #546E7A; padding: 10px; border-radius: 12px; font-size: 1rem; font-weight: bold; box-shadow: 0 4px 0 #B0BEC5; cursor: pointer; }
+        .btn-tool { background: #BA68C8; color: white; padding: 8px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; flex: 1; font-size: 0.9rem; }
+        
+        .switch-container { display: flex; align-items: center; justify-content: flex-end; gap: 8px; font-size: 0.9rem; margin-bottom: 5px; color: #666; }
+        
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 4000; display: flex; justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; padding: 20px; border-radius: 20px; text-align: left; }
 
-        .answer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; color: white; }
-        .answer-big-text { font-size: 5rem; font-weight: bold; color: #FFEB3B; letter-spacing: 6px; font-family: 'Consolas', monospace; }
-
-        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-8px);} 75% {transform: translateX(8px);} }
-        .shake-anim { animation: shake 0.3s ease-in-out; }
-
-        /* 💻 iPad / 大螢幕優化 */
         @media (min-width: 600px) {
-            h1 { font-size: 2.5rem; }
-            .card { padding: 2.5rem; }
-            .chinese-hint { font-size: 3.5rem; margin: 20px 0; }
-            .spell-display { font-size: 4rem; min-height: 5rem; }
-            .letter-grid { gap: 15px; }
-            .letter-btn { padding: 25px 5px; font-size: 2.2rem; border-radius: 20px; }
-            .score-display, .hearts-display { font-size: 1.8rem; }
+            .chinese-hint { font-size: 3.5rem; }
+            .spell-display { font-size: 4rem; }
+            .letter-btn { padding: 25px 5px; font-size: 2.2rem; }
         }
     </style>
 </head>
@@ -81,9 +58,9 @@
 <div class="card" id="login-screen">
     <h1>🎈 兒童趣味拼字 🎈</h1>
     <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
-        <div style="background: #FFF3E0; padding: 25px 15px; border-radius: 20px; border: 2px dashed #FFB74D;">
+        <div style="background: #FFF3E0; padding: 25px; border-radius: 20px; border: 2px dashed #FFB74D;">
             <label style="font-size: 1.3rem; font-weight: bold; color: var(--primary); display: block; margin-bottom: 15px;">👤 請輸入挑戰者 ID：</label>
-            <input type="text" id="user-id-input" placeholder="例如：Kevin" style="font-size: 1.5rem; text-align: center; padding: 15px;" onkeypress="if(event.key==='Enter')processLogin()">
+            <input type="text" id="user-id-input" placeholder="例如：Kevin" style="font-size: 1.5rem; text-align: center;">
         </div>
     </div>
     <button class="btn-primary" onclick="processLogin()">進入遊戲 ➡️</button>
@@ -94,77 +71,96 @@
     <div id="welcome-msg" style="font-size: 1.1rem; font-weight: bold; color: var(--secondary); margin-bottom: 10px;"></div>
     
     <div class="settings-group">
-        <div class="group-title">📚 1. 選擇單字庫</div>
+        <div class="group-title">📚 選擇單字庫與範圍</div>
         <select id="level-select" onchange="onLevelChange()"></select>
-    </div>
-    <div class="settings-group">
-        <div class="group-title">🎯 2. 挑戰範圍與模式</div>
-        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
-            <input type="number" id="r-start" style="flex:1"> 
-            <span style="font-weight:bold">~</span>
-            <input type="number" id="r-end" style="flex:1">
+        <div style="display: flex; gap: 10px; margin-top: 8px;">
+            <input type="number" id="r-start" style="flex:1" placeholder="起點"> <span style="line-height:40px">~</span>
+            <input type="number" id="r-end" style="flex:1" placeholder="終點">
+            <button class="btn-tool" style="background:#4DB6AC" onclick="previewWords()">📖 預覽</button>
         </div>
+    </div>
+
+    <div class="settings-group">
+        <div class="group-title">🎯 挑戰模式</div>
         <div style="display: flex; gap: 10px;">
             <button id="btn-mode-all" class="btn-mode active" onclick="setMode('all')">🏆 全部</button>
             <button id="btn-mode-random" class="btn-mode" onclick="setMode('random10')">🎲 隨機10題</button>
         </div>
         <input type="hidden" id="quiz-mode" value="all">
     </div>
+
     <div class="settings-group">
-        <div class="group-title">🗣️ 3. 專屬語音助理 (<span id="platform-label">偵測中</span>)</div>
+        <div class="group-title">🗣️ 語音助理 (<span id="platform-label">偵測中</span>)</div>
         <select id="voice-select"></select>
-        <input type="range" id="voice-rate" min="0.5" max="2.0" step="0.1" value="1.0">
+        <div style="display: flex; gap: 10px; margin-top: 5px;">
+            <button class="btn-tool" onclick="testVoice()">語音測試 🔊</button>
+            <div style="flex: 2; display: flex; align-items: center; gap: 10px; background: white; padding: 0 10px; border-radius: 10px; border: 1px solid #FFCC80;">
+                <span style="font-size: 0.8rem; white-space: nowrap;">語速</span>
+                <input type="range" id="voice-rate" min="0.5" max="1.5" step="0.1" value="1.0" style="margin:0">
+            </div>
+        </div>
     </div>
-    <button class="btn-primary" id="start-btn" disabled onclick="initGame()">🚀 開始遊戲！</button>
+    <button class="btn-primary" id="start-btn" disabled onclick="initGame()">🚀 開始挑戰！</button>
 </div>
 
 <div class="card hidden" id="game-screen">
     <div class="game-header">
-        <button class="btn-secondary" style="padding: 5px 12px;" onclick="location.reload()">🔙 返回</button>
+        <button onclick="location.reload()" style="background:none; border:none; font-size:1.5rem;">🔙</button>
         <div id="quiz-progress" style="font-weight: bold; background: #FFE082; padding: 5px 15px; border-radius: 10px;"></div>
+        <div></div>
+    </div>
+    <div class="switch-container">
+        <span>按鍵發音</span>
+        <input type="checkbox" id="key-voice-toggle" checked style="width:20px; height:20px; margin:0;">
     </div>
     <div class="info-board">
-        <div class="hearts-display" id="hearts-display">❤️❤️❤️</div>
-        <div class="score-display" id="score-display">⭐ 0</div>
+        <div id="hearts-display" style="font-size:1.2rem;">❤️❤️❤️</div>
+        <div id="score-display" style="font-weight:bold; color:#FBC02D;">⭐ 0</div>
     </div>
     <button onclick="playVoice()" style="font-size: 4.5rem; background:none; border:none; cursor:pointer;">🔊</button>
     <div class="chinese-hint" id="target-zh"></div>
     <div class="spell-display" id="user-input-display"></div>
     <div class="letter-grid" id="keyboard"></div>
-    <div style="flex-grow: 1;"></div>
     <div id="feedback" style="margin-top:10px; font-weight:bold; min-height:1.5rem;"></div>
-    <div style="display: flex; gap: 15px; margin-top: 10px;">
-        <button class="btn-secondary" style="flex:1" onclick="backspace()">⬅️ 倒退</button>
-        <button class="btn-secondary" style="flex:1" onclick="clearInput()">🗑️ 清除</button>
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button class="btn-mode" onclick="backspace()">⬅️ 倒退</button>
+        <button class="btn-mode" onclick="clearInput()">🗑️ 清除</button>
     </div>
 </div>
 
-<div id="answer-overlay" class="answer-overlay hidden">
-    <div style="color: #FFCC80; font-size: 1.5rem; margin-bottom: 20px;">正確答案是：</div>
-    <div class="answer-big-text" id="overlay-en"></div>
-    <div style="font-size: 2rem; margin-top: 15px;" id="overlay-zh"></div>
+<div class="card hidden" id="result-screen">
+    <h1 id="final-stars" style="font-size: 3.5rem;">⭐⭐⭐</h1>
+    <div id="result-body" style="background: #f9f9f9; padding: 25px; border-radius: 20px; border: 2px dashed var(--primary); text-align: left; line-height: 2; margin-bottom: 20px;"></div>
+    <button class="btn-primary" onclick="restartGame()">再玩一次 🚀</button>
 </div>
 
-<div class="card hidden" id="result-screen">
-    <h1 id="final-stars" style="font-size: 3rem;">⭐⭐⭐</h1>
-    <div id="result-body" style="line-height: 1.8; margin: 20px 0; font-size: 1.2rem; background: #f9f9f9; padding: 25px; border-radius: 20px; border: 2px dashed var(--primary);"></div>
-    <div style="flex-grow: 1;"></div>
-    <button class="btn-primary" onclick="location.reload()">再玩一次 🚀</button>
+<div id="preview-modal" class="modal hidden" onclick="this.classList.add('hidden')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3 style="color:var(--primary); border-bottom:2px solid #eee; padding-bottom:10px;">📖 單字清單預覽</h3>
+        <div id="preview-list" style="line-height: 1.8;"></div>
+        <button class="btn-primary" style="margin-top:20px;" onclick="document.getElementById('preview-modal').classList.add('hidden')">關閉</button>
+    </div>
+</div>
+
+<div id="answer-overlay" class="modal hidden" style="background: rgba(0,0,0,0.95);">
+    <div style="text-align: center; color: white;">
+        <div style="color: #FFCC80; font-size: 1.5rem; margin-bottom: 20px;">正確答案是：</div>
+        <div id="overlay-en" style="font-size: 4rem; font-weight: bold; color: #FFEB3B; font-family: 'Consolas', monospace;"></div>
+        <div id="overlay-zh" style="font-size: 2rem; margin-top: 15px;"></div>
+    </div>
 </div>
 
 <script>
     let wordData = {}, quizList = [], currentIdx = 0, currentInput = "";
-    let attemptsLeft = 3, initialQuizCount = 0, totalAttemptsCount = 0, score = 0;
+    let attemptsLeft = 3, initialQuizCount = 0, totalAttempts = 0, score = 0;
     let synth = window.speechSynthesis, voices = [];
-    let audioCtx, currentUserId = "";
+    let currentUserId = "", startTime;
 
-    // 🆕 平台辨識邏輯
     function getPlatform() {
         const ua = navigator.userAgent;
         if (/android/i.test(ua)) return "Android";
         if (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return "iOS";
         if (/Windows/i.test(ua)) return "Windows";
-        if (/Macintosh/i.test(ua)) return "macOS";
         return "Generic";
     }
 
@@ -172,42 +168,32 @@
         let allVoices = synth.getVoices();
         const platform = getPlatform();
         document.getElementById('platform-label').innerText = platform;
-
-        // 1. 語言過濾 (en)
         let filtered = allVoices.filter(v => v.lang.includes('en') || v.lang.includes('EN'));
-
-        // 2. 依照使用的平台篩選對應的聲調 (核心更新)
-        if (platform === "Android") {
-            // Android 僅列出 Google 或 Samsung 提供的語音
-            filtered = filtered.filter(v => /google|samsung/i.test(v.name));
-        } else if (platform === "iOS" || platform === "macOS") {
-            // Apple 設備排除 Chrome 帶入的 Google 語音，僅留系統原生 (Siri 系列)
-            filtered = filtered.filter(v => !/google/i.test(v.name));
-        } else if (platform === "Windows") {
-            // Windows 僅列出 Microsoft 提供的語音
-            filtered = filtered.filter(v => /microsoft/i.test(v.name));
-        }
-
-        voices = filtered;
-        // 回退機制：若篩選後變空，則顯示所有英文
-        if (voices.length === 0) voices = allVoices.filter(v => v.lang.includes('en') || v.lang.includes('EN'));
         
+        if (platform === "Android") filtered = filtered.filter(v => /google|samsung/i.test(v.name));
+        else if (platform === "iOS") filtered = filtered.filter(v => !/google/i.test(v.name));
+        else if (platform === "Windows") filtered = filtered.filter(v => /microsoft/i.test(v.name));
+
+        voices = filtered.length > 0 ? filtered : allVoices.filter(v => v.lang.includes('en'));
         const select = document.getElementById('voice-select');
-        select.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name} (${v.lang})</option>`).join('');
-        
-        // 智慧選取預設最標準的聲音
-        let def = voices.findIndex(v => /samantha|google us|zira|siri/i.test(v.name));
-        if(def >= 0) select.value = def;
+        select.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
     }
-    
+
     if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = initVoices;
-    setTimeout(initVoices, 300);
+    setTimeout(initVoices, 500);
+
+    function testVoice() {
+        const utter = new SpeechSynthesisUtterance("Hello! I am ready.");
+        utter.voice = voices[document.getElementById('voice-select').value];
+        utter.rate = document.getElementById('voice-rate').value;
+        synth.speak(utter);
+    }
 
     function processLogin() {
-        const input = document.getElementById('user-id-input').value.trim();
-        if (!input) return alert("請輸入名字喔！");
-        currentUserId = input;
-        document.getElementById('welcome-msg').innerText = `加油，${currentUserId}！`;
+        const id = document.getElementById('user-id-input').value.trim();
+        if (!id) return alert("請輸入 ID 喔！");
+        currentUserId = id;
+        document.getElementById('welcome-msg').innerText = `準備好了嗎？${currentUserId}！`;
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('setup-screen').classList.remove('hidden');
     }
@@ -216,25 +202,32 @@
         try {
             const resp = await fetch('單字庫.TXT');
             const text = await resp.text();
-            const lines = text.split(/\r?\n/).filter(l => l.trim() !== "" && !l.includes("等級"));
-            lines.forEach(line => {
+            text.split(/\r?\n/).filter(l => l.trim() && !l.includes("等級")).forEach(line => {
                 const p = line.split(',');
                 if (p.length >= 3) {
                     if (!wordData[p[0].trim()]) wordData[p[0].trim()] = [];
                     wordData[p[0].trim()].push({ en: p[1].trim(), zh: p.slice(2).join(',').trim() });
                 }
             });
-            const lvls = Object.keys(wordData);
-            document.getElementById('level-select').innerHTML = lvls.map(l => `<option value="${l}">${l}</option>`).join('');
+            document.getElementById('level-select').innerHTML = Object.keys(wordData).map(l => `<option value="${l}">${l}</option>`).join('');
             document.getElementById('start-btn').disabled = false;
             onLevelChange();
-        } catch (e) { alert("讀取失敗，請確認單字庫.TXT 檔案。"); }
+        } catch (e) { alert("無法開啟單字庫.TXT，請確認檔案。"); }
     }
 
     function onLevelChange() {
         const lvl = document.getElementById('level-select').value;
         document.getElementById('r-start').value = 1;
         document.getElementById('r-end').value = wordData[lvl].length;
+    }
+
+    function previewWords() {
+        const lvl = document.getElementById('level-select').value;
+        let s = parseInt(document.getElementById('r-start').value) - 1;
+        let e = parseInt(document.getElementById('r-end').value);
+        let list = wordData[lvl].slice(s, e);
+        document.getElementById('preview-list').innerHTML = list.map((w, i) => `<div>${s+i+1}. <strong>${w.en}</strong> - ${w.zh}</div>`).join('');
+        document.getElementById('preview-modal').classList.remove('hidden');
     }
 
     function setMode(mode) {
@@ -244,14 +237,14 @@
     }
 
     function initGame() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const lvl = document.getElementById('level-select').value;
         const mode = document.getElementById('quiz-mode').value;
-        let start = parseInt(document.getElementById('r-start').value) - 1;
-        let end = parseInt(document.getElementById('r-end').value);
-        let base = wordData[lvl].slice(start, end).sort(() => Math.random() - 0.5);
+        let s = parseInt(document.getElementById('r-start').value) - 1;
+        let e = parseInt(document.getElementById('r-end').value);
+        let base = wordData[lvl].slice(s, e).sort(() => Math.random() - 0.5);
         quizList = (mode === "random10") ? base.slice(0, 10) : base;
-        initialQuizCount = quizList.length; currentIdx = 0; score = 0; totalAttemptsCount = 0;
+        initialQuizCount = quizList.length; currentIdx = 0; score = 0; totalAttempts = 0;
+        startTime = new Date();
         document.getElementById('setup-screen').classList.add('hidden');
         document.getElementById('game-screen').classList.remove('hidden');
         loadQuestion();
@@ -273,7 +266,7 @@
     }
 
     function updateUI() {
-        document.getElementById('quiz-progress').innerText = `${currentIdx + 1}/${quizList.length}`;
+        document.getElementById('quiz-progress').innerText = `${currentIdx + 1} / ${quizList.length}`;
         document.getElementById('target-zh').innerText = quizList[currentIdx].zh;
         document.getElementById('hearts-display').innerText = "❤️".repeat(attemptsLeft) + "🖤".repeat(3 - attemptsLeft);
         document.getElementById('score-display').innerText = `⭐ ${score}`;
@@ -281,17 +274,21 @@
     }
 
     function pressKey(c) {
+        if (document.getElementById('key-voice-toggle').checked) {
+            const utter = new SpeechSynthesisUtterance(c);
+            utter.voice = voices[document.getElementById('voice-select').value];
+            synth.speak(utter);
+        }
         const target = quizList[currentIdx].en;
         currentInput += c;
         document.getElementById('user-input-display').innerText = currentInput.replace(/ /g, "_");
         if (currentInput.length === target.length) {
-            totalAttemptsCount++;
+            totalAttempts++;
             if (currentInput === target) {
-                score += 10; playSound(800);
-                document.getElementById('feedback').innerText = "✨ 太棒了！ ✨";
-                setTimeout(() => { currentIdx++; if (currentIdx >= quizList.length) showResult(); else loadQuestion(); }, 1000);
+                score += 10; document.getElementById('feedback').innerText = "太棒了！✨";
+                setTimeout(() => { document.getElementById('feedback').innerText = ""; currentIdx++; if (currentIdx >= quizList.length) showResult(); else loadQuestion(); }, 1000);
             } else {
-                attemptsLeft--; score = Math.max(0, score - 3); playSound(200);
+                attemptsLeft--; score = Math.max(0, score - 3);
                 if (attemptsLeft > 0) { currentInput = ""; updateUI(); }
                 else { showAnswerOverlay(); }
             }
@@ -304,27 +301,13 @@
         document.getElementById('overlay-zh').innerText = q.zh;
         document.getElementById('answer-overlay').classList.remove('hidden');
         quizList.push(q);
-        setTimeout(() => {
-            document.getElementById('answer-overlay').classList.add('hidden');
-            currentIdx++; if (currentIdx >= quizList.length) showResult(); else loadQuestion();
-        }, 2500);
-    }
-
-    function playSound(freq) {
-        if (!audioCtx) return;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+        setTimeout(() => { document.getElementById('answer-overlay').classList.add('hidden'); currentIdx++; if (currentIdx >= quizList.length) showResult(); else loadQuestion(); }, 2500);
     }
 
     function playVoice() {
         synth.cancel();
         const utter = new SpeechSynthesisUtterance(quizList[currentIdx].en);
-        const vIdx = document.getElementById('voice-select').value;
-        if(voices[vIdx]) utter.voice = voices[vIdx];
+        utter.voice = voices[document.getElementById('voice-select').value];
         utter.rate = document.getElementById('voice-rate').value;
         synth.speak(utter);
     }
@@ -332,13 +315,22 @@
     function showResult() {
         document.getElementById('game-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
-        const acc = Math.round((initialQuizCount / totalAttemptsCount) * 100);
+        const duration = Math.floor((new Date() - startTime) / 1000);
+        const acc = Math.round((initialQuizCount / totalAttempts) * 100) || 0;
+        let starStr = acc >= 85 ? "⭐⭐⭐" : (acc >= 60 ? "⭐⭐" : "⭐");
+        document.getElementById('final-stars').innerText = starStr;
         document.getElementById('result-body').innerHTML = `
-            👤 挑戰者：${currentUserId}<br>
-            🎯 單字量：${initialQuizCount} 個<br>
-            📈 正確率：${acc}%<br>
-            🏆 總積分：<span style="color:#FBC02D; font-size:1.5rem; font-weight:bold;">${score}</span>
+            👤 <strong>挑戰者：</strong> ${currentUserId}<br>
+            📅 <strong>日期：</strong> ${new Date().toLocaleString()}<br>
+            ⏱️ <strong>總耗時：</strong> ${duration} 秒<br>
+            📈 <strong>正確率：</strong> ${acc}%<br>
+            🏆 <strong>最終積分：</strong> <span style="color:var(--primary); font-size:1.5rem; font-weight:bold;">${score} 分</span>
         `;
+    }
+
+    function restartGame() {
+        document.getElementById('result-screen').classList.add('hidden');
+        document.getElementById('setup-screen').classList.remove('hidden');
     }
 
     function backspace() { currentInput = currentInput.slice(0, -1); updateUI(); }
