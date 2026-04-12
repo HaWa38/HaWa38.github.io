@@ -441,7 +441,7 @@
                 playSound('correct');
                 document.getElementById('score-display').style.color = "var(--success)";
                 setTimeout(() => document.getElementById('score-display').style.color = "#FBC02D", 500);
-                document.getElementById('feedback').innerText = "✨ 太棒了！ (+10分) ✨";
+                document.getElementById('feedback').innerText = "✨ 太棒了！太棒了！ ✨";
                 document.getElementById('feedback').style.color = "var(--success)";
                 
                 setTimeout(() => { 
@@ -467,7 +467,7 @@
         if (attemptsLeft > 0) {
             currentInput = "";
             updateUI(); 
-            document.getElementById('feedback').innerText = "❌ 差一點點 (扣3分)，再試試！";
+            document.getElementById('feedback').innerText = "❌ 差一點點，再試試！";
             document.getElementById('feedback').style.color = "var(--error)";
         } else {
             updateUI(); 
@@ -565,6 +565,7 @@
     function backToSetup() {
     // 1. 隱藏遊戲畫面
     document.getElementById('game-screen').classList.add('hidden');
+    document.getElementById('result-screen').classList.add('hidden');
     
     // 2. 顯示設定畫面
     document.getElementById('setup-screen').classList.remove('hidden');
@@ -574,11 +575,6 @@
         synth.cancel();
     }
 }
-
-
-
-
-
 </script>
 </body>
 </html>
