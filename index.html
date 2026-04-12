@@ -437,7 +437,8 @@
         if (currentInput.length === target.length) {
             totalAttemptsCount++;
             if (currentInput === target) {
-                score += pointPerWord;
+                let multiplier = attemptsLeft / 3;
+                score += pointPerWord * multiplier;
                 playSound('correct');
                 document.getElementById('score-display').style.color = "var(--success)";
                 setTimeout(() => document.getElementById('score-display').style.color = "#FBC02D", 500);
@@ -457,7 +458,6 @@
 
     function handleIncorrect() {
         attemptsLeft--;
-        score = Math.max(0, score - (pointPerWord * 0.3));
         playSound('incorrect');
         document.getElementById('score-display').style.color = "var(--error)";
         setTimeout(() => document.getElementById('score-display').style.color = "#FBC02D", 500);
