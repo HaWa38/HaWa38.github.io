@@ -533,8 +533,8 @@
     function showResult() {
         document.getElementById('game-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
-        const finalScore = Math.min(100, Math.round(score));
         const accuracy = Math.round((initialQuizCount / totalAttemptsCount) * 100);
+        const finalScore = Math.min(100, Math.round(score * (initialQuizCount / totalAttemptsCount)));
         
         let stars = "", rank = "", quote = "";
         if (accuracy === 100) { stars = "⭐⭐⭐⭐⭐"; rank = "👑 拼字傳奇：英文之神"; quote = "哇！你被拼字之神附身了嗎？簡直是本世紀最強的英文天才！🏆"; }
@@ -548,8 +548,8 @@
         document.getElementById('result-body').innerHTML = `
             <span class="rank-title">${rank}</span>
             🎯 挑戰單字量：${initialQuizCount} 個<br>
-            🛠️ 總試錯與挑戰：${totalAttemptsCount} 次<br>
-            📈 精確正確率：<span style="color:var(--primary); font-size:1.5rem; font-weight:bold;">${accuracy}%</span><br>
+            🛠️ 總回答次數：${totalAttemptsCount} 次<br>
+            📈 單字熟練度：<span style="color:var(--primary); font-size:1.5rem; font-weight:bold;">${accuracy}%</span><br>
             🏆 最終總得分：<span style="color:#FBC02D; font-size:1.5rem; font-weight:bold;">${finalScore}</span>
         `;
         document.getElementById('funny-feedback').innerText = quote;
