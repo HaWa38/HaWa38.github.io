@@ -200,7 +200,7 @@
 <div class="card hidden" id="game-screen">
     <div class="game-header">
         <div class="header-item">
-            <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;" onclick="location.reload()">🔙 離開</button>
+            <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;" onclick="login()">🔙 離開</button>
         </div>
         <div class="header-item">
             <div class="header-toggle">
@@ -238,7 +238,7 @@
     <div id="result-body" style="line-height: 1.8; margin: 15px 0; font-size: 1.1rem; background: #f5f5f5; padding: 15px; border-radius: 15px; border: 2px dashed var(--primary); text-align: left; width: 100%;"></div>
     <div id="funny-feedback" class="funny-quote" style="margin-bottom: 20px;"></div>
     <div style="margin-top: auto; width: 100%;">
-        <button class="btn-primary" onclick="location.reload()">再玩一次 🚀</button>
+        <button class="btn-primary" onclick="login()">再玩一次 🚀</button>
     </div>
 </div>
 
@@ -249,6 +249,7 @@
     let score = 0;
     let synth = window.speechSynthesis, voices = [];
     let audioCtx;
+    let pointPerWord = 0;
 
     // 跨平台語音初始化邏輯
     function initVoices() {
@@ -377,6 +378,8 @@
         quizList = (mode === "random10") ? baseList.slice(0, 10) : baseList;
         
         initialQuizCount = quizList.length; 
+        // 【修改點 1】計算每題分值 (總分 100 / 總題數)
+        pointPerWord = 100 / initialQuizCount;
         currentIdx = 0; score = 0; totalAttemptsCount = 0;
 
         document.getElementById('setup-screen').classList.add('hidden');
@@ -406,7 +409,7 @@
         document.getElementById('quiz-progress').innerText = `${currentIdx + 1}/${quizList.length}`;
         document.getElementById('target-zh').innerText = quizList[currentIdx].zh;
         document.getElementById('hearts-display').innerText = "❤️".repeat(attemptsLeft) + "🖤".repeat(3 - attemptsLeft);
-        document.getElementById('score-display').innerText = `⭐ ${score}`;
+        document.getElementById('score-display').innerText = `⭐ ${Math.round(score)}`;
         document.getElementById('user-input-display').innerText = currentInput.replace(/ /g, "_");
         document.getElementById('feedback').innerText = "";
     }
@@ -434,7 +437,7 @@
         if (currentInput.length === target.length) {
             totalAttemptsCount++;
             if (currentInput === target) {
-                score += 10;
+                score += pointPerWord;
                 playSound('correct');
                 document.getElementById('score-display').style.color = "var(--success)";
                 setTimeout(() => document.getElementById('score-display').style.color = "#FBC02D", 500);
@@ -454,7 +457,7 @@
 
     function handleIncorrect() {
         attemptsLeft--;
-        score = Math.max(0, score - 3);
+        score = Math.max(0, score - (pointPerWord * 0.3));
         playSound('incorrect');
         document.getElementById('score-display').style.color = "var(--error)";
         setTimeout(() => document.getElementById('score-display').style.color = "#FBC02D", 500);
@@ -530,6 +533,7 @@
     function showResult() {
         document.getElementById('game-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
+        const finalScore = Math.min(100, Math.round(score));
         const accuracy = Math.round((initialQuizCount / totalAttemptsCount) * 100);
         
         let stars = "", rank = "", quote = "";
