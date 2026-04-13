@@ -100,7 +100,7 @@
     </div>
     <div style="display: flex; gap: 10px; margin-top: 20px;">
         <button class="btn-primary" style="flex: 1; padding: 15px 10px; margin-top: 0;" onclick="toggleInstructionModal(true)">📖 遊戲說明</button>
-        <button class="btn-primary" style="flex: 1; padding: 15px 10px; margin-top: 0;" onclick="login()">開始遊戲 🚀</button>
+        <button class="btn-primary" style="flex: 1; padding: 15px 10px; margin-top: 0;" onclick="login()">進入遊戲 🚀</button>
     </div>
     <h2>🚶 離開請直接關閉即可! 🚶</h2>
 </div>
@@ -295,6 +295,7 @@
         unlockAudio(); // 在使用者點擊登入時順便解鎖 iOS 聲音權限
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('setup-screen').classList.remove('hidden');
+        playSound('welcome'); // <--- 在這裡觸發歡迎音效
     }
 
     function toggleInstructionModal(show) {
@@ -341,7 +342,7 @@
         currentIdx = 0; score = 0; totalAttemptsCount = 0;
 
         document.getElementById('setup-screen').classList.add('hidden');
-        document.getElementById('game-screen').classList.remove('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');        
         loadQuestion();
     }
 
@@ -374,7 +375,9 @@
 
     function speakLetter(char) {
         synth.cancel();
-        let textToSpeak = (char === ' ') ? 'space' : char;
+        // 1. 如果是空白鍵則唸 'space'
+        // 2. 如果是字母，統一轉成小寫 (.toLowerCase()) 以避免 iOS 唸出 "capital"
+        let textToSpeak = (char === ' ') ? 'space' : char.toLowerCase();        
         const utter = new SpeechSynthesisUtterance(textToSpeak);
         const vIdx = document.getElementById('voice-select').value;
         if(voices[vIdx]) utter.voice = voices[vIdx];
@@ -470,7 +473,25 @@
     }
 
     function playSound(type) {
-        if (!audioCtx) return;
+     if (!audioCtx) return;
+    
+     if (type === 'welcome') {
+        // 歡迎音效：四個快速連續上升的音階 (A4, C#5, E5, A5)
+        [440, 554, 659, 880].forEach((freq, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.08);
+            gain.gain.setValueAtTime(0, audioCtx.currentTime + i * 0.08);
+            gain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + i * 0.08 + 0.02);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + i * 0.08 + 0.2);
+            
+            osc.start(audioCtx.currentTime + i * 0.08);
+            osc.stop(audioCtx.currentTime + i * 0.08 + 0.2);
+        });
+     } else {
+        // 原有的正確與錯誤音效邏輯...
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
@@ -484,11 +505,12 @@
         gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
         osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-    }
-
-    function playVoice() {
-        synth.cancel();
-        const utter = new SpeechSynthesisUtterance(quizList[currentIdx].en);
+     }
+ }
+ 
+   function playVoice() {
+        synth.cancel();        
+        const utter = new SpeechSynthesisUtterance(quizList[currentIdx].en.toLowerCase());
         const vIdx = document.getElementById('voice-select').value;
         if(voices[vIdx]) utter.voice = voices[vIdx];
         utter.rate = parseFloat(document.getElementById('voice-rate').value);
