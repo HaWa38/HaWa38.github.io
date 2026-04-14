@@ -109,20 +109,15 @@
     <div class="modal-content" style="max-height: 85vh; overflow-y: auto; text-align: left;">
         <h2 style="color:var(--primary); margin-top: 0; text-align: center;">📖 遊戲使用說明</h2>
         <div style="line-height: 1.6; color: var(--text); font-size: 1.05rem;">
-            <p><b>✨ 遊戲規則：</b></p>
+            <p><b>✨ 遊戲模式：</b></p>
             <ul style="padding-left: 20px;">
-                <li>選擇適合的單字等級與範圍後即可開始挑戰，點擊「預覽字庫」可以先複習喔！</li>
-                <li>每個單字有 <b>3 次</b> 回答的機會❤️；若 3 次全錯會顯示答案，該題會移到最後讓你重新練習。</li>
-                <li>測驗畫面中點擊字母按鈕會同步讀出該字母，亦可於測驗畫面中關閉！</li>
-                <li>熟練度為總題數除以總答題次數!</li>
-                <li>總 得 分為測驗得到的⭐數與熟練度相乘的結果</li>
+                <li><b>🏆 全部挑戰：</b> 完整測驗，每個單字有 3 次機會，若 3 次全錯，該題會移到最後讓你重新補考練習。</li>
+                <li><b>🎲 隨機 10 題 (計時挑戰)：</b> <span style="color:var(--error); font-weight:bold;">30秒限時挑戰！</span>答錯不補考，必須在時間內完成 10 題，且總得分超過 90 分才算過關喔！</li>
             </ul>
-            <p><b>💯 計分方式：</b></p>
+            <p><b>💯 計分方式 (單題最高10⭐)：</b></p>
             <ul style="padding-left: 20px;">
-                <li>第一次就答對：得 <b>10顆⭐</b></li>
-                <li>第二次才答對：得 <b>5顆⭐</b></li>
-                <li>第三次才答對：得 <b>2顆⭐</b></li>
-                <li>重新挑戰答對，則分別得：<b>5顆、2顆、1顆⭐</b></li>
+                <li>第一次答對得 <b>10顆⭐</b>，第二次 <b>5顆⭐</b>，第三次 <b>2顆⭐</b></li>
+                <li>若是「全部挑戰」的重新補考答對，則得：<b>5顆、2顆、1顆⭐</b></li>
                 <li><span style="color:var(--error); font-weight:bold;">答錯不扣分喔！</span>放膽去試吧！</li>
             </ul>
         </div>
@@ -154,7 +149,7 @@
         </div>
         <div style="display: flex; gap: 10px;">
             <button id="btn-mode-all" class="btn-mode active" onclick="setMode('all')">🏆 全部挑戰</button>
-            <button id="btn-mode-random" class="btn-mode" onclick="setMode('random10')">🎲 隨機 10 題</button>
+            <button id="btn-mode-random" class="btn-mode" onclick="setMode('random10')">🎲 限時 10 題</button>
         </div>
         <input type="hidden" id="quiz-mode" value="all">
     </div>
@@ -187,6 +182,9 @@
                 <input type="checkbox" id="letter-sound-toggle" checked style="cursor:pointer; width:14px; height:14px;">
                 <label for="letter-sound-toggle" style="cursor:pointer;">按鍵音</label>
             </div>
+        </div>
+        <div class="header-item" id="timer-container" style="display:none; margin-right: 5px;">
+            <div style="font-weight: bold; color: #D32F2F; font-size: 0.85rem; background: #FFCDD2; padding: 3px 8px; border-radius: 10px; border: 1px solid #E53935;">⏳ <span id="time-left">30</span>s</div>
         </div>
         <div class="header-item">
             <div id="quiz-progress" style="font-weight: bold; color: #795548; font-size: 0.8rem; background: #FFE082; padding: 3px 8px; border-radius: 10px;"></div>
@@ -221,34 +219,36 @@
     let synth = window.speechSynthesis, voices = [];
     let audioCtx;
     let currentUserId = "未命名挑戰者";
+    
+    // 計時器相關變數
+    let timerInterval = null;
+    let timeLeft = 30;
+    let isPaused = false;
+    let isGameEnded = false;
 
     // 修改：確保跨平台(包含 iOS)都能正確讀取英文語音
     function initVoices() {
         let allVoices = synth.getVoices();
         if (allVoices.length === 0) {
-            // 在某些瀏覽器上需稍微等待才會載入
             setTimeout(initVoices, 100);
             return;
         }
         voices = allVoices.filter(v => v.lang.toLowerCase().includes('en') || v.name.toLowerCase().includes('english'));
-        if (voices.length === 0) voices = allVoices; // 如果找不到英文，退回顯示全部
+        if (voices.length === 0) voices = allVoices; 
         
         document.getElementById('voice-select').innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
     }
     if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = initVoices;
-    setTimeout(initVoices, 200); // 針對 iOS 防呆觸發
+    setTimeout(initVoices, 200); 
 
-    // iOS 聲音解鎖機制 (需在使用者互動事件中觸發)
     function unlockAudio() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
         
-        // 解鎖語音
         let blankUtter = new SpeechSynthesisUtterance('');
         blankUtter.volume = 0;
         synth.speak(blankUtter);
 
-        // 解鎖音效
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         gain.gain.value = 0;
@@ -292,10 +292,10 @@
             return;
         }
         currentUserId = inputId;
-        unlockAudio(); // 在使用者點擊登入時順便解鎖 iOS 聲音權限
+        unlockAudio(); 
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('setup-screen').classList.remove('hidden');
-        playSound('welcome'); // <--- 在這裡觸發歡迎音效
+        playSound('welcome'); 
     }
 
     function toggleInstructionModal(show) {
@@ -334,19 +334,44 @@
         let end = parseInt(document.getElementById('r-end').value);
         if (isNaN(start) || start < 0 || end > wordData[lvl].length) return alert("範圍設定錯誤！");
 
-        // 將單字帶入 quizList 時，預設為非補考 (isRetry: false)
         let baseList = wordData[lvl].slice(start, end).sort(() => Math.random() - 0.5);
         quizList = (mode === "random10") ? baseList.slice(0, 10).map(q => ({...q, isRetry: false})) : baseList.map(q => ({...q, isRetry: false}));
         
         initialQuizCount = quizList.length; 
         currentIdx = 0; score = 0; totalAttemptsCount = 0;
+        
+        // 重置計時器狀態
+        isGameEnded = false;
+        isPaused = false;
+        clearInterval(timerInterval);
+        
+        if (mode === 'random10') {
+            timeLeft = 30;
+            document.getElementById('timer-container').style.display = 'flex';
+            document.getElementById('time-left').innerText = timeLeft;
+            startTimer();
+        } else {
+            document.getElementById('timer-container').style.display = 'none';
+        }
 
         document.getElementById('setup-screen').classList.add('hidden');
         document.getElementById('game-screen').classList.remove('hidden');        
         loadQuestion();
     }
 
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            if (isPaused || isGameEnded) return; // 畫面切換時暫停計時，保護玩家權益
+            timeLeft--;
+            document.getElementById('time-left').innerText = timeLeft;
+            if (timeLeft <= 0) {
+                showResult();
+            }
+        }, 1000);
+    }
+
     function loadQuestion() {
+        if(isGameEnded) return;
         const q = quizList[currentIdx];
         currentInput = ""; attemptsLeft = 3;
         updateUI();
@@ -361,7 +386,13 @@
         let kbHTML = letters.map(c => `<button class="letter-btn" onclick="pressKey(this.textContent)">${c}</button>`).join('');
         if (q.en.includes(" ")) kbHTML += `<button class="letter-btn" style="grid-column: span 2;" onclick="pressKey(' ')">Space</button>`;
         document.getElementById('keyboard').innerHTML = kbHTML;
-        setTimeout(playVoice, 500);
+        
+        // 延遲發音時也稍微暫停一下計時，確保體驗好
+        isPaused = true;
+        setTimeout(() => {
+            playVoice();
+            isPaused = false;
+        }, 500);
     }
 
     function updateUI() {
@@ -375,8 +406,6 @@
 
     function speakLetter(char) {
         synth.cancel();
-        // 1. 如果是空白鍵則唸 'space'
-        // 2. 如果是字母，統一轉成小寫 (.toLowerCase()) 以避免 iOS 唸出 "capital"
         let textToSpeak = (char === ' ') ? 'space' : char.toLowerCase();        
         const utter = new SpeechSynthesisUtterance(textToSpeak);
         const vIdx = document.getElementById('voice-select').value;
@@ -386,6 +415,8 @@
     }
 
     function pressKey(char) {
+        if(isGameEnded) return;
+        
         if (document.getElementById('letter-sound-toggle').checked) {
             speakLetter(char);
         }
@@ -399,7 +430,6 @@
             totalAttemptsCount++;
             if (currentInput === target) {
                 
-                // 判斷給分：如果是補考題目給分調整為 5/2/1
                 let pointsEarned = 0;
                 if (isRetry) {
                     pointsEarned = (attemptsLeft === 3) ? 5 : (attemptsLeft === 2) ? 2 : 1;
@@ -415,7 +445,9 @@
                 document.getElementById('feedback').innerText = `✨ 太棒了！ (+${pointsEarned}顆⭐) ✨`;
                 document.getElementById('feedback').style.color = "var(--success)";
                 
+                isPaused = true; // 答對時暫停計時器
                 setTimeout(() => { 
+                    isPaused = false;
                     currentIdx++; 
                     if (currentIdx >= quizList.length) showResult(); 
                     else loadQuestion(); 
@@ -444,6 +476,7 @@
     }
 
     function showAnswerOverlay(wordObj) {
+        isPaused = true; // 顯示答案時暫停計時器
         const overlay = document.getElementById('answer-overlay');
         document.getElementById('overlay-en').innerText = wordObj.en;
         document.getElementById('overlay-zh').innerText = wordObj.zh;
@@ -451,11 +484,15 @@
 
         speakAnswerWithGuidance(wordObj.en);
         
-        // 修改：將該單字加入題庫尾端，稍後重新挑戰，並加上 isRetry: true 標記
-        quizList.push({ en: wordObj.en, zh: wordObj.zh, isRetry: true });
+        const mode = document.getElementById('quiz-mode').value;
+        // 如果不是隨機10題模式，才將單字塞回尾端補考
+        if (mode !== 'random10') {
+            quizList.push({ en: wordObj.en, zh: wordObj.zh, isRetry: true });
+        }
 
         setTimeout(() => {
             overlay.classList.add('hidden');
+            isPaused = false;
             currentIdx++;
             if (currentIdx >= quizList.length) showResult();
             else loadQuestion();
@@ -476,22 +513,45 @@
      if (!audioCtx) return;
     
      if (type === 'welcome') {
-        // 歡迎音效：四個快速連續上升的音階 (A4, C#5, E5, A5)
         [440, 554, 659, 880].forEach((freq, i) => {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
-            
             osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.08);
             gain.gain.setValueAtTime(0, audioCtx.currentTime + i * 0.08);
             gain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + i * 0.08 + 0.02);
             gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + i * 0.08 + 0.2);
-            
             osc.start(audioCtx.currentTime + i * 0.08);
             osc.stop(audioCtx.currentTime + i * 0.08 + 0.2);
         });
+     } else if (type === 'win') {
+        // 過關祝賀音效
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => { 
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.1);
+            gain.gain.setValueAtTime(0, audioCtx.currentTime + i * 0.1);
+            gain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + i * 0.1 + 0.05);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + i * 0.1 + 0.3);
+            osc.start(audioCtx.currentTime + i * 0.1);
+            osc.stop(audioCtx.currentTime + i * 0.1 + 0.3);
+        });
+     } else if (type === 'lose') {
+        // 失敗鼓勵音效
+        [440, 415.30, 392.00, 349.23].forEach((freq, i) => { 
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.3);
+            gain.gain.setValueAtTime(0, audioCtx.currentTime + i * 0.3);
+            gain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + i * 0.3 + 0.1);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + i * 0.3 + 0.4);
+            osc.start(audioCtx.currentTime + i * 0.3);
+            osc.stop(audioCtx.currentTime + i * 0.3 + 0.4);
+        });
      } else {
-        // 原有的正確與錯誤音效邏輯...
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
@@ -518,21 +578,51 @@
     }
 
     function showResult() {
+        if(isGameEnded) return;
+        isGameEnded = true;
+        clearInterval(timerInterval); 
+
         document.getElementById('game-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
-        const accuracy = Math.round((initialQuizCount / totalAttemptsCount) * 100);
+        
+        const mode = document.getElementById('quiz-mode').value;
+        
+        // 確保提早結束時不會出現計算錯誤 (除以零或超過 100%)
+        let qCount = (mode === 'random10' && currentIdx < initialQuizCount) ? currentIdx : initialQuizCount;
+        let accRatio = totalAttemptsCount === 0 ? 0 : qCount / totalAttemptsCount;
+        const accuracy = Math.round(accRatio * 100);
         
         const maxPossibleScore = initialQuizCount * 10;
-        let normalizedScore = Math.round((score / maxPossibleScore)*(initialQuizCount / totalAttemptsCount) * 100);
+        let normalizedScore = Math.round((score / maxPossibleScore) * accRatio * 100);
         if (normalizedScore > 100) normalizedScore = 100; 
         if (isNaN(normalizedScore)) normalizedScore = 0;
 
         let stars = "", rank = "", quote = "";
-        if (accuracy === 100) { stars = "⭐⭐⭐⭐⭐"; rank = "👑 拼字傳奇：英文之神"; quote = "哇！你被拼字之神附身了嗎？簡直是本世紀最強的英文天才！🏆"; }
-        else if (accuracy >= 85) { stars = "⭐⭐⭐⭐"; rank = "🔥 拼字英雄：超級單字王"; quote = "太厲害了！你的腦袋裡一定裝了一台超級電腦吧？🚀"; }
-        else if (accuracy >= 65) { stars = "⭐⭐⭐"; rank = "🌟 拼字尖兵：智慧之星"; quote = "表現得相當不錯喔！腦袋裡的知識果實正在長大，再接再厲！💪"; }
-        else if (accuracy >= 40) { stars = "⭐⭐"; rank = "☘️ 拼字學徒：勇氣之星"; quote = "嘿！你已經成功跨出了一大步。記得嗎？愛迪生發明電燈也失敗很多次喔！🍀"; }
-        else { stars = "⭐"; rank = "🥚 拼字萌新：勇氣小雞"; quote = "沒關係，失敗是成功的維他命！單字們在跟你玩捉迷藏，多玩幾次就能通通抓出來！🐣"; }
+
+        if (mode === 'random10') {
+            // 限時挑戰判定邏輯
+            const isWin = (currentIdx >= initialQuizCount) && (normalizedScore >= 90);
+            
+            if (isWin) {
+                playSound('win');
+                stars = "🏆 限時挑戰成功 🏆";
+                rank = "⚡ 閃電拼字大師";
+                quote = "太神啦！30秒內完美過關，你的手速跟大腦一樣快！🎉";
+            } else {
+                playSound('lose');
+                stars = "💪 挑戰未達標 💪";
+                rank = "⏳ 時間管理者(見習)";
+                let reason = (currentIdx < initialQuizCount) ? "哎呀，時間到啦！" : `差一點點！(過關需90分，您得${normalizedScore}分)`;
+                quote = `${reason} 沒關係，深呼吸，活動一下手指，再挑戰一次一定會更好！✨`;
+            }
+        } else {
+            // 原本的全部挑戰邏輯
+            if (accuracy === 100) { stars = "⭐⭐⭐⭐⭐"; rank = "👑 拼字傳奇：英文之神"; quote = "哇！你被拼字之神附身了嗎？簡直是本世紀最強的英文天才！🏆"; }
+            else if (accuracy >= 85) { stars = "⭐⭐⭐⭐"; rank = "🔥 拼字英雄：超級單字王"; quote = "太厲害了！你的腦袋裡一定裝了一台超級電腦吧？🚀"; }
+            else if (accuracy >= 65) { stars = "⭐⭐⭐"; rank = "🌟 拼字尖兵：智慧之星"; quote = "表現得相當不錯喔！腦袋裡的知識果實正在長大，再接再厲！💪"; }
+            else if (accuracy >= 40) { stars = "⭐⭐"; rank = "☘️ 拼字學徒：勇氣之星"; quote = "嘿！你已經成功跨出了一大步。記得嗎？愛迪生發明電燈也失敗很多次喔！🍀"; }
+            else { stars = "⭐"; rank = "🥚 拼字萌新：勇氣小雞"; quote = "沒關係，失敗是成功的維他命！單字們在跟你玩捉迷藏，多玩幾次就能通通抓出來！🐣"; }
+        }
 
         document.getElementById('final-stars').innerText = stars;
         document.getElementById('result-body').innerHTML = `
@@ -557,6 +647,7 @@
     window.onload = autoFetchData;
 
     function backToLogin() {
+        clearInterval(timerInterval); // 確保離開時清除計時器
         document.getElementById('game-screen').classList.add('hidden');
         document.getElementById('setup-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.add('hidden');
