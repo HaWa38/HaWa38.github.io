@@ -112,13 +112,15 @@
             <p><b>✨ 遊戲模式：</b></p>
             <ul style="padding-left: 20px;">
                 <li><b>🏆 全部挑戰：</b> 完整測驗，每個單字有 3 次機會，若 3 次全錯，該題會移到最後讓你重新補考練習。</li>
-                <li><b>🎲 隨機 10 題 (計時挑戰)：</b> <span style="color:var(--error); font-weight:bold;">30秒限時挑戰！</span>答錯不補考，必須在時間內完成 10 題，且總得分超過 90 分才算過關喔！</li>
+                <li><b>🎲 隨機 10 題 (計時挑戰)：</b> <span style="color:var(--error); font-weight:bold;">60秒限時挑戰！</span>必須在時間內完成 10 題，且總得分超過 80 分才算過關喔！</li>
             </ul>
-            <p><b>💯 計分方式 (單題最高10⭐)：</b></p>
+            <p><b>💯 計分方式 (單題最高10顆⭐)：</b></p>
             <ul style="padding-left: 20px;">
                 <li>第一次答對得 <b>10顆⭐</b>，第二次 <b>5顆⭐</b>，第三次 <b>2顆⭐</b></li>
-                <li>若是「全部挑戰」的重新補考答對，則得：<b>5顆、2顆、1顆⭐</b></li>
-                <li><span style="color:var(--error); font-weight:bold;">答錯不扣分喔！</span>放膽去試吧！</li>
+                <li>若是「全部挑戰」的重新補考答對，第一次答對得 <b>10顆⭐</b>，第二次 <b>5顆⭐</b>，第三次 <b>2顆⭐</b></li>
+                <li>總⭐數：依總挑戰單字數正規化至最高100顆</li>
+                <li>熟練度：<span style="color:var(--error); font-weight:bold;"> 總挑戰單字數 </span>除以<span style="color:var(--error); font-weight:bold;">  總回答次數 </span>GO!</li> 
+                <li>總得分：<span style="color:var(--error); font-weight:bold;"> 總⭐數 </span>乘以<span style="color:var(--error); font-weight:bold;"> 熟練度</span> 放膽試吧！</li>
             </ul>
         </div>
         <button class="btn-primary" style="margin-top:15px;" onclick="toggleInstructionModal(false)">我了解了！</button>
@@ -222,7 +224,7 @@
     
     // 計時器相關變數
     let timerInterval = null;
-    let timeLeft = 30;
+    let timeLeft = 60;
     let isPaused = false;
     let isGameEnded = false;
 
@@ -346,7 +348,7 @@
         clearInterval(timerInterval);
         
         if (mode === 'random10') {
-            timeLeft = 30;
+            timeLeft = 60;
             document.getElementById('timer-container').style.display = 'flex';
             document.getElementById('time-left').innerText = timeLeft;
             startTimer();
@@ -601,18 +603,18 @@
 
         if (mode === 'random10') {
             // 限時挑戰判定邏輯
-            const isWin = (currentIdx >= initialQuizCount) && (normalizedScore >= 90);
+            const isWin = (currentIdx >= initialQuizCount) && (normalizedScore >= 80);
             
             if (isWin) {
                 playSound('win');
                 stars = "🏆 限時挑戰成功 🏆";
                 rank = "⚡ 閃電拼字大師";
-                quote = "太神啦！30秒內完美過關，你的手速跟大腦一樣快！🎉";
+                quote = "太神啦！60秒內完美過關，你的手速跟大腦一樣快！🎉";
             } else {
                 playSound('lose');
                 stars = "💪 挑戰未達標 💪";
                 rank = "⏳ 時間管理者(見習)";
-                let reason = (currentIdx < initialQuizCount) ? "哎呀，時間到啦！" : `差一點點！(過關需90分，您得${normalizedScore}分)`;
+                let reason = (currentIdx < initialQuizCount) ? "哎呀，時間到啦！" : `差一點點！(過關需80分，您得${normalizedScore}分)`;
                 quote = `${reason} 沒關係，深呼吸，活動一下手指，再挑戰一次一定會更好！✨`;
             }
         } else {
@@ -634,6 +636,7 @@
                 🎯 挑戰單字量：${initialQuizCount} 個<br>
                 🛠️ 總挑戰次數：${totalAttemptsCount} 次<br>
                 📈 單字熟練度：<span style="color:var(--primary); font-size:1.5rem; font-weight:bold;">${accuracy}%</span><br>
+                ⭐ 獲得星星數：<span style="color:var(--primary); font-size:1.5rem; font-weight:bold;">${normalizedScore}顆⭐</span><br>
                 🏆 總  得  分：<span style="color:#FBC02D; font-size:1.8rem; font-weight:bold;">${normalizedScore}</span> 分
             </div>               
         `;
