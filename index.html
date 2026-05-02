@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>👑 兒童趣味拼字挑戰 👑</title>
+    <title>👑 兒童趣味拼字挑戰 - 生存篇 👑</title>
     <style>
         :root { 
             --primary: #FF7043; 
@@ -112,7 +112,7 @@
             <p><b>✨ 遊戲模式：</b></p>
             <ul style="padding-left: 20px;">
                 <li><b>🏆 全部挑戰：</b> 完整測驗，每個單字有 3 次機會，若 3 次全錯，該題會移到最後讓你重新補考練習。</li>
-                <li><b>🎲 隨機 10 題 (計時挑戰)：</b> <span style="color:var(--error); font-weight:bold;">60秒限時挑戰！</span>必須在時間內完成 10 題，且總得分超過 80 分才算過關喔！</li>
+                <li><b>🔥 生存挑戰：</b> <span style="color:var(--error); font-weight:bold;">一錯即敗！</span>挑戰範圍內的所有單字，只要拼錯一次就直接結束，考驗你能連續答對幾題！</li>
             </ul>
             <p><b>💯 計分方式 (單題最高10顆⭐)：</b></p>
             <ul style="padding-left: 20px;">
@@ -151,7 +151,7 @@
         </div>
         <div style="display: flex; gap: 10px;">
             <button id="btn-mode-all" class="btn-mode active" onclick="setMode('all')">🏆 全部挑戰</button>
-            <button id="btn-mode-random" class="btn-mode" onclick="setMode('random10')">🎲 限時 10 題</button>
+            <button id="btn-mode-random" class="btn-mode" onclick="setMode('survival')">🔥 生存挑戰</button>
         </div>
         <input type="hidden" id="quiz-mode" value="all">
     </div>
@@ -222,7 +222,7 @@
     let audioCtx;
     let currentUserId = "未命名挑戰者";
     
-    // 計時器相關變數
+    // 計時器相關變數 (生存模式不使用)
     let timerInterval = null;
     let timeLeft = 60;
     let isPaused = false;
@@ -314,7 +314,7 @@
     function setMode(mode) {
         document.getElementById('quiz-mode').value = mode;
         document.getElementById('btn-mode-all').classList.toggle('active', mode === 'all');
-        document.getElementById('btn-mode-random').classList.toggle('active', mode === 'random10');
+        document.getElementById('btn-mode-random').classList.toggle('active', mode === 'survival');
     }
 
     function toggleWordModal(show) {
@@ -337,39 +337,23 @@
         if (isNaN(start) || start < 0 || end > wordData[lvl].length) return alert("範圍設定錯誤！");
 
         let baseList = wordData[lvl].slice(start, end).sort(() => Math.random() - 0.5);
-        quizList = (mode === "random10") ? baseList.slice(0, 10).map(q => ({...q, isRetry: false})) : baseList.map(q => ({...q, isRetry: false}));
+        
+        // 兩種模式都載入全部所選範圍的單字
+        quizList = baseList.map(q => ({...q, isRetry: false}));
         
         initialQuizCount = quizList.length; 
         currentIdx = 0; score = 0; totalAttemptsCount = 0;
         
-        // 重置計時器狀態
+        // 重置狀態
         isGameEnded = false;
         isPaused = false;
         clearInterval(timerInterval);
         
-        if (mode === 'random10') {
-            timeLeft = 60;
-            document.getElementById('timer-container').style.display = 'flex';
-            document.getElementById('time-left').innerText = timeLeft;
-            startTimer();
-        } else {
-            document.getElementById('timer-container').style.display = 'none';
-        }
+        document.getElementById('timer-container').style.display = 'none'; // 生存模式與全部挑戰都不顯示計時器
 
         document.getElementById('setup-screen').classList.add('hidden');
         document.getElementById('game-screen').classList.remove('hidden');        
         loadQuestion();
-    }
-
-    function startTimer() {
-        timerInterval = setInterval(() => {
-            if (isPaused || isGameEnded) return; // 畫面切換時暫停計時，保護玩家權益
-            timeLeft--;
-            document.getElementById('time-left').innerText = timeLeft;
-            if (timeLeft <= 0) {
-                showResult();
-            }
-        }, 1000);
     }
 
     function loadQuestion() {
@@ -389,7 +373,7 @@
         if (q.en.includes(" ")) kbHTML += `<button class="letter-btn" style="grid-column: span 2;" onclick="pressKey(' ')">Space</button>`;
         document.getElementById('keyboard').innerHTML = kbHTML;
         
-        // 延遲發音時也稍微暫停一下計時，確保體驗好
+        // 延遲發音
         isPaused = true;
         setTimeout(() => {
             playVoice();
@@ -398,9 +382,17 @@
     }
 
     function updateUI() {
+        const mode = document.getElementById('quiz-mode').value;
         document.getElementById('quiz-progress').innerText = `${currentIdx + 1}/${quizList.length}`;
         document.getElementById('target-zh').innerText = quizList[currentIdx].zh;
-        document.getElementById('hearts-display').innerText = "❤️".repeat(attemptsLeft) + "🖤".repeat(3 - attemptsLeft);
+        
+        // 生存模式隱藏愛心或以特殊方式顯示
+        if (mode === 'survival') {
+            document.getElementById('hearts-display').innerText = "🔥 生存模式";
+        } else {
+            document.getElementById('hearts-display').innerText = "❤️".repeat(attemptsLeft) + "🖤".repeat(3 - attemptsLeft);
+        }
+        
         document.getElementById('score-display').innerText = `⭐ ${score}`;
         document.getElementById('user-input-display').innerText = currentInput.replace(/ /g, "_");
         document.getElementById('feedback').innerText = "";
@@ -447,7 +439,7 @@
                 document.getElementById('feedback').innerText = `✨ 太棒了！ (+${pointsEarned}顆⭐) ✨`;
                 document.getElementById('feedback').style.color = "var(--success)";
                 
-                isPaused = true; // 答對時暫停計時器
+                isPaused = true; 
                 setTimeout(() => { 
                     isPaused = false;
                     currentIdx++; 
@@ -461,7 +453,14 @@
     }
 
     function handleIncorrect() {
-        attemptsLeft--;
+        const mode = document.getElementById('quiz-mode').value;
+        
+        if (mode === 'survival') {
+            attemptsLeft = 0; // 生存模式直接失敗
+        } else {
+            attemptsLeft--;
+        }
+
         playSound('incorrect');
         document.getElementById('game-screen').classList.add('shake-anim');
         setTimeout(() => document.getElementById('game-screen').classList.remove('shake-anim'), 300);
@@ -478,26 +477,39 @@
     }
 
     function showAnswerOverlay(wordObj) {
-        isPaused = true; // 顯示答案時暫停計時器
+        isPaused = true; 
         const overlay = document.getElementById('answer-overlay');
+        const mode = document.getElementById('quiz-mode').value;
+        
         document.getElementById('overlay-en').innerText = wordObj.en;
         document.getElementById('overlay-zh').innerText = wordObj.zh;
-        overlay.classList.remove('hidden');
+        
+        // 生存模式顯示失敗提示字樣
+        if (mode === 'survival') {
+            document.querySelector('.answer-label').innerText = "💥 哎呀，正確拼法是：";
+        } else {
+            document.querySelector('.answer-label').innerText = "💡 沒關係，看清楚囉：";
+        }
 
+        overlay.classList.remove('hidden');
         speakAnswerWithGuidance(wordObj.en);
         
-        const mode = document.getElementById('quiz-mode').value;
-        // 如果不是隨機10題模式，才將單字塞回尾端補考
-        if (mode !== 'random10') {
+        if (mode !== 'survival') {
             quizList.push({ en: wordObj.en, zh: wordObj.zh, isRetry: true });
         }
 
         setTimeout(() => {
             overlay.classList.add('hidden');
             isPaused = false;
-            currentIdx++;
-            if (currentIdx >= quizList.length) showResult();
-            else loadQuestion();
+            
+            // 如果是生存挑戰模式，看完答案後直接進入結算
+            if (mode === 'survival') {
+                showResult();
+            } else {
+                currentIdx++;
+                if (currentIdx >= quizList.length) showResult();
+                else loadQuestion();
+            }
         }, 2500);
     }
 
@@ -527,7 +539,6 @@
             osc.stop(audioCtx.currentTime + i * 0.08 + 0.2);
         });
      } else if (type === 'win') {
-        // 過關祝賀音效
         [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => { 
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
@@ -540,7 +551,6 @@
             osc.stop(audioCtx.currentTime + i * 0.1 + 0.3);
         });
      } else if (type === 'lose') {
-        // 失敗鼓勵音效
         [440, 415.30, 392.00, 349.23].forEach((freq, i) => { 
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
@@ -589,41 +599,55 @@
         
         const mode = document.getElementById('quiz-mode').value;
         
-        // 確保提早結束時不會出現計算錯誤 (除以零或超過 100%)
-        let qCount = (mode === 'random10' && currentIdx < initialQuizCount) ? currentIdx : initialQuizCount;
-        let accRatio = totalAttemptsCount === 0 ? 0 : qCount / totalAttemptsCount;
-        const accuracy = Math.round(accRatio * 100);
-        
-        const maxPossibleScore = initialQuizCount * 10;
-        let normalizedScore = Math.round((score / maxPossibleScore) * accRatio * 100);
-        if (normalizedScore > 100) normalizedScore = 100; 
-        if (isNaN(normalizedScore)) normalizedScore = 0;
+        let stars = "", rank = "", quote = "", statsHTML = "";
 
-        let stars = "", rank = "", quote = "";
-
-        if (mode === 'random10') {
-            // 限時挑戰判定邏輯
-            const isWin = (currentIdx >= initialQuizCount) && (normalizedScore >= 80);
+        if (mode === 'survival') {
+            const isWin = (currentIdx === initialQuizCount);
             
             if (isWin) {
                 playSound('win');
-                stars = "🏆 限時挑戰成功 🏆";
-                rank = "⚡ 閃電拼字大師";
-                quote = "太神啦！60秒內完美過關，你的手速跟大腦一樣快！🎉";
+                stars = "🏆 完美通關 🏆";
+                rank = "⚡ 終極生存大師";
+                quote = "太神啦！零失誤完美過關，你的大腦簡直是單字神庫！🎉";
             } else {
                 playSound('lose');
-                stars = "💪 挑戰未達標 💪";
-                rank = "⏳ 時間管理者(見習)";
-                let reason = (currentIdx < initialQuizCount) ? "哎呀，時間到啦！" : `差一點點！(過關需80分，您得${normalizedScore}分)`;
-                quote = `${reason} 沒關係，深呼吸，活動一下手指，再挑戰一次一定會更好！✨`;
+                stars = "💥 挑戰中斷 💥";
+                rank = "🔥 勇敢的挑戰者";
+                quote = `哎呀，不小心拼錯了！不過你成功連續答對了 ${currentIdx} 題，活動一下手指，再試一次打破紀錄吧！✨`;
             }
+
+            statsHTML = `
+                👤 挑戰者：<b>${currentUserId}</b><br>
+                🎯 目標單字量：${initialQuizCount} 個<br>
+                ✅ 連續答對：<span style="color:var(--success); font-size:1.5rem; font-weight:bold;">${currentIdx} 題</span><br>
+                ⭐ 獲得星星數：<span style="color:var(--primary); font-size:1.5rem; font-weight:bold;">${score}顆⭐</span><br>
+            `;
+
         } else {
             // 原本的全部挑戰邏輯
+            let qCount = initialQuizCount;
+            let accRatio = totalAttemptsCount === 0 ? 0 : qCount / totalAttemptsCount;
+            const accuracy = Math.round(accRatio * 100);
+            
+            const maxPossibleScore = initialQuizCount * 10;
+            let normalizedScore = Math.round((score / maxPossibleScore) * accRatio * 100);
+            if (normalizedScore > 100) normalizedScore = 100; 
+            if (isNaN(normalizedScore)) normalizedScore = 0;
+
             if (accuracy === 100) { stars = "⭐⭐⭐⭐⭐"; rank = "👑 拼字傳奇：英文之神"; quote = "哇！你被拼字之神附身了嗎？簡直是本世紀最強的英文天才！🏆"; }
             else if (accuracy >= 85) { stars = "⭐⭐⭐⭐"; rank = "🔥 拼字英雄：超級單字王"; quote = "太厲害了！你的腦袋裡一定裝了一台超級電腦吧？🚀"; }
             else if (accuracy >= 65) { stars = "⭐⭐⭐"; rank = "🌟 拼字尖兵：智慧之星"; quote = "表現得相當不錯喔！腦袋裡的知識果實正在長大，再接再厲！💪"; }
             else if (accuracy >= 40) { stars = "⭐⭐"; rank = "☘️ 拼字學徒：勇氣之星"; quote = "嘿！你已經成功跨出了一大步。記得嗎？愛迪生發明電燈也失敗很多次喔！🍀"; }
             else { stars = "⭐"; rank = "🥚 拼字萌新：勇氣小雞"; quote = "沒關係，失敗是成功的維他命！單字們在跟你玩捉迷藏，多玩幾次就能通通抓出來！🐣"; }
+
+            statsHTML = `
+                👤 挑戰者：<b>${currentUserId}</b><br>
+                🎯 挑戰單字量：${initialQuizCount} 個<br>
+                🛠️ 總挑戰次數：${totalAttemptsCount} 次<br>
+                📈 單字熟練度：<span style="color:var(--primary); font-size:1.5rem; font-weight:bold;">${accuracy}%</span><br>
+                ⭐ 獲得星星數：<span style="color:var(--primary); font-size:1.5rem; font-weight:bold;">${normalizedScore}顆⭐</span><br>
+                🏆 總  得  分：<span style="color:#FBC02D; font-size:1.8rem; font-weight:bold;">${normalizedScore}</span> 分
+            `;
         }
 
         document.getElementById('final-stars').innerText = stars;
@@ -632,12 +656,7 @@
                 <span class="rank-title">${rank}</span>
             </div>
             <div style="margin-left: 10ch;">
-                👤 挑戰者：<b>${currentUserId}</b><br>
-                🎯 挑戰單字量：${initialQuizCount} 個<br>
-                🛠️ 總挑戰次數：${totalAttemptsCount} 次<br>
-                📈 單字熟練度：<span style="color:var(--primary); font-size:1.5rem; font-weight:bold;">${accuracy}%</span><br>
-                ⭐ 獲得星星數：<span style="color:var(--primary); font-size:1.5rem; font-weight:bold;">${normalizedScore}顆⭐</span><br>
-                🏆 總  得  分：<span style="color:#FBC02D; font-size:1.8rem; font-weight:bold;">${normalizedScore}</span> 分
+                ${statsHTML}
             </div>               
         `;
         document.getElementById('funny-feedback').innerText = quote;
